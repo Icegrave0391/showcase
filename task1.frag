@@ -354,7 +354,30 @@ vec3 CastRay( in Ray_t ray,
     /////////////////////////////////
     // TASK: WRITE YOUR CODE HERE. //
     /////////////////////////////////
-
+    int plane_num = NUM_PLANES;
+    int sphere_num = NUM_SPHERES;
+    //calculate sphere intersection
+    for(int i = 0; i < sphere_num; i++){
+        temp_hasHit = IntersectSphere(Sphere[i], ray, DEFAULT_TMIN, DEFAULT_TMAX, temp_t, temp_hitPos, temp_hitNormal);
+        if(temp_hasHit) hasHitSomething = true;
+        if(temp_hasHit && temp_t < nearest_t){
+            nearest_t = temp_t;
+            nearest_hitPos = temp_hitPos;
+            nearest_hitNormal = temp_hitNormal;
+            nearest_hitMatID = Sphere[i].materialID;
+        }
+    }
+    //calculate plane intersection
+    for(int i = 0; i < plane_num; i++){
+        temp_hasHit = IntersectPlane(Plane[i], ray, DEFAULT_TMIN, DEFAULT_TMAX, temp_t, temp_hitPos, temp_hitNormal);
+        if(temp_hasHit) hasHitSomething = true;
+        if(temp_hasHit && temp_t < nearest_t){
+            nearest_t = temp_t;
+            nearest_hitPos = temp_hitPos;
+            nearest_hitNormal = temp_hitNormal;
+            nearest_hitMatID = Plane[i].materialID;
+        }
+    }
 
 
     // One of the output results.
@@ -376,7 +399,32 @@ vec3 CastRay( in Ray_t ray,
     /////////////////////////////////
     // TASK: WRITE YOUR CODE HERE. //
     /////////////////////////////////
-
+    for(int i = 0; i < NUM_LIGHTS; i++){
+        //***for each light source, make a shadow ray
+        Ray_t shadowRay;
+        shadowRay.o = nearest_hitPos;
+        shadowRay.d = normalize(Light[i].position - nearest_hitPos);
+        bool isShadow = false;
+        //*** iterate all planes and spheres in the shadow ray
+        for(int j = 0; j < NUM_SPHERES; j++){
+            if(IntersectSphere(Sphere[j], shadowRay, DEFAULT_TMIN, DEFAULT_TMAX)){
+                isShadow = true;
+                break;
+            }
+        }
+        //***
+        if(!isShadow){
+            for(int n = 0; n < NUM_PLANES; n++){
+                if(IntersectPlane(Plane[n], shadowRay, DEFAULT_TMIN, DEFAULT_TMAX)){
+                    isShadow = true;
+                    break;
+                }
+            }
+        }
+        //***phong lighting
+        vec3 phong = PhongLighting(shadowRay.d, nearest_hitNormal, -ray.d, isShadow, Material[nearest_hitMatID], Light[i]);
+        I_local = I_local + phong;
+    }
 
 
     // Populate output results.
