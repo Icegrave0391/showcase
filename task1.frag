@@ -406,10 +406,20 @@ vec3 CastRay( in Ray_t ray,
         shadowRay.d = normalize(Light[i].position - nearest_hitPos);
         bool isShadow = false;
         //*** iterate all planes and spheres in the shadow ray
+        float max_dis = sqrt(dot(Light[i].position - nearest_hitPos, Light[i].position - nearest_hitPos));
         for(int j = 0; j < NUM_SPHERES; j++){
-            if(IntersectSphere(Sphere[j], shadowRay, DEFAULT_TMIN, DEFAULT_TMAX)){
+            if(IntersectSphere(Sphere[j], shadowRay, DEFAULT_TMIN, max_dis)){
                 isShadow = true;
                 break;
+            }
+        }
+        //***
+        if(!isShadow){
+            for(int n = 0; n < NUM_PLANES; n++){
+                if(IntersectPlane(Plane[n], shadowRay, DEFAULT_TMIN, max_dis)){
+                    isShadow = true;
+                    break;
+                }
             }
         }
         //***phong lighting
