@@ -412,15 +412,6 @@ vec3 CastRay( in Ray_t ray,
                 break;
             }
         }
-        //***
-        if(!isShadow){
-            for(int n = 0; n < NUM_PLANES; n++){
-                if(IntersectPlane(Plane[n], shadowRay, DEFAULT_TMIN, DEFAULT_TMAX)){
-                    isShadow = true;
-                    break;
-                }
-            }
-        }
         //***phong lighting
         vec3 phong = PhongLighting(shadowRay.d, nearest_hitNormal, -ray.d, isShadow, Material[nearest_hitMatID], Light[i]);
         I_local = I_local + phong;
