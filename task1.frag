@@ -226,8 +226,31 @@ bool IntersectSphere( in Sphere_t sph, in Ray_t ray, in float tmin, in float tma
     /////////////////////////////////
     // TASK: WRITE YOUR CODE HERE. //
     /////////////////////////////////
-    return false;  // Replace this with your code.
-
+    //*** calculate a, b and c
+    float a = dot(ray.d, ray.d);
+    float b = 2.0 * dot(ray.o, ray.d) - 2.0 * dot(sph.center, ray.d);
+    float c = dot(ray.o, ray.o) - 2.0 * dot(sph.center, ray.o) + dot(sph.center, sph.center) - sph.radius * sph.radius;
+    float delta = b * b - 4 * a * c;
+    //solution
+    float t_sol;
+    float t_neg = (-b - sqrt(delta)) / (2 * a);
+    float t_pos = (-b + sqrt(delta)) / (2 * a);
+    //select t
+    if(t_neg >= 0.0){
+        t_sol = t_neg;
+    }
+    else if(t_pos >= 0.0){
+        t_sol = t_pos;
+    }
+    else{
+        t_sol = -1;    //just false
+        return false;
+    }
+    if(t_sol > tmax || t_sol < tmin) return false;
+    t = t_sol;
+    hitPos = ray.o + t * ray.d;
+    hitNormal = normalize(hitPos - sph.center);
+    return true;
 }
 
 
@@ -242,7 +265,28 @@ bool IntersectSphere( in Sphere_t sph, in Ray_t ray, in float tmin, in float tma
     /////////////////////////////////
     // TASK: WRITE YOUR CODE HERE. //
     /////////////////////////////////
-    return false;  // Replace this with your code.
+    //*** calculate a, b and c
+    float a = dot(ray.d, ray.d);
+    float b = 2.0 * dot(ray.o, ray.d) - 2.0 * dot(sph.center, ray.d);
+    float c = dot(ray.o, ray.o) - 2.0 * dot(sph.center, ray.o) + dot(sph.center, sph.center) - sph.radius * sph.radius;
+    float delta = b * b - 4 * a * c;
+    //solution
+    float t_sol;
+    float t_neg = (-b - sqrt(delta)) / (2 * a);
+    float t_pos = (-b + sqrt(delta)) / (2 * a);
+    //select t
+    if(t_neg >= 0.0){
+        t_sol = t_neg;
+    }
+    else if(t_pos >= 0.0){
+        t_sol = t_pos;
+    }
+    else{
+        t_sol = -1;    //just false
+        return false;
+    }
+    if(t_sol > tmax || t_sol < tmin) return false;
+    return true;
 
 }
 
