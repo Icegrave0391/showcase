@@ -230,11 +230,11 @@ bool IntersectSphere( in Sphere_t sph, in Ray_t ray, in float tmin, in float tma
     float a = dot(ray.d, ray.d);
     float b = 2.0 * dot(ray.o, ray.d) - 2.0 * dot(sph.center, ray.d);
     float c = dot(ray.o, ray.o) - 2.0 * dot(sph.center, ray.o) + dot(sph.center, sph.center) - sph.radius * sph.radius;
-    float delta = b * b - 4 * a * c;
+    float delta = b * b - 4.0 * a * c;
     //solution
     float t_sol;
-    float t_neg = (-b - sqrt(delta)) / (2 * a);
-    float t_pos = (-b + sqrt(delta)) / (2 * a);
+    float t_neg = (-b - sqrt(delta)) / (2.0 * a);
+    float t_pos = (-b + sqrt(delta)) / (2.0 * a);
     //select t
     if(t_neg >= 0.0){
         t_sol = t_neg;
@@ -243,7 +243,7 @@ bool IntersectSphere( in Sphere_t sph, in Ray_t ray, in float tmin, in float tma
         t_sol = t_pos;
     }
     else{
-        t_sol = -1;    //just false
+        t_sol = -1.0;    //just false
         return false;
     }
     if(t_sol > tmax || t_sol < tmin) return false;
@@ -269,11 +269,11 @@ bool IntersectSphere( in Sphere_t sph, in Ray_t ray, in float tmin, in float tma
     float a = dot(ray.d, ray.d);
     float b = 2.0 * dot(ray.o, ray.d) - 2.0 * dot(sph.center, ray.d);
     float c = dot(ray.o, ray.o) - 2.0 * dot(sph.center, ray.o) + dot(sph.center, sph.center) - sph.radius * sph.radius;
-    float delta = b * b - 4 * a * c;
+    float delta = b * b - 4.0 * a * c;
     //solution
     float t_sol;
-    float t_neg = (-b - sqrt(delta)) / (2 * a);
-    float t_pos = (-b + sqrt(delta)) / (2 * a);
+    float t_neg = (-b - sqrt(delta)) / (2.0 * a);
+    float t_pos = (-b + sqrt(delta)) / (2.0 * a);
     //select t
     if(t_neg >= 0.0){
         t_sol = t_neg;
@@ -282,7 +282,7 @@ bool IntersectSphere( in Sphere_t sph, in Ray_t ray, in float tmin, in float tma
         t_sol = t_pos;
     }
     else{
-        t_sol = -1;    //just false
+        t_sol = -1.0;    //just false
         return false;
     }
     if(t_sol > tmax || t_sol < tmin) return false;
