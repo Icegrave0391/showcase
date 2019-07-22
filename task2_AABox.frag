@@ -51,6 +51,8 @@ const int NUM_ITERATIONS = 6;
 
 const float INTERVAL = 0.5;
 
+//direction
+int MOV_DIRECTION = 0; // 1:up 2:down 3:left 4:right 
 
 //============================================================================
 // Define new struct types.
@@ -148,7 +150,7 @@ void InitScene()
     Material[0].k_d = vec3( 0.5, 0.5, 0.5 );
     Material[0].k_a = 0.2 * Material[0].k_d;
     Material[0].k_r = 2.0 * Material[0].k_d;
-    Material[0].k_rg = 0.5 * Material[0].k_r;
+    Material[0].k_rg = 0.5 * Material[0].k_r;   
     Material[0].n = 64.0;
 
     // Gold material.
