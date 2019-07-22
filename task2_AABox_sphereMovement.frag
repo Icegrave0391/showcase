@@ -53,6 +53,8 @@ const int NUM_ITERATIONS = 6;
 
 const float INTERVAL = 0.5;
 
+//direction
+int MOV_DIRECTION = 0; // 1:up, 2:down, 3:left, 4:right
 
 //============================================================================
 // Define new struct types.
