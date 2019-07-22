@@ -225,7 +225,7 @@ bool IntersectPlane( in Plane_t pln, in Ray_t ray, in float tmin, in float tmax 
 
 // Movement of the sphere
 vec3 changeCenter(vec3 centerOld) {
-	vec4 sphereInfo = texture(iChannel1, vec2(0.0));
+	vec4 sphereInfo = texture(iChannel0, vec2(0.0));
     vec3 change = sphereInfo.xyz;
     
     return change;
