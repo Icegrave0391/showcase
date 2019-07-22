@@ -63,7 +63,13 @@ struct Ray_t {
 struct Plane_t {
     // The plane equation is Ax + By + Cz + D = 0.
     float A, B, C, D;
+    // plane type
+    int type;      //default type = 0 ; texture type = 1
+    //only usful when type = 0
     int materialID;
+    //only use when type = 1
+    float s, t;    
+    int textureID; //binds to channel
 };
 
 struct Sphere_t {
@@ -126,6 +132,7 @@ void InitScene()
     Plane[0].B = 1.0;
     Plane[0].C = 0.0;
     Plane[0].D = 0.0;
+    Plane[0].type = 1;
     Plane[0].materialID = 0;
 
     AABox[0].center = vec3(0.0, 3.0, 5.0);
@@ -438,8 +445,27 @@ vec3 PhongLighting( in vec3 L, in vec3 N, in vec3 V, in bool inShadow,
                light.I_source * (mat.k_d * N_dot_L + mat.k_r * R_dot_V_pow_n);
     }
 }
+//texture phong lighting
+vec3 PhongLighting( in vec3 L, in vec3 N, in vec3 V, in bool inShadow, 
+                    in vec2 tex_coord, in Light_t light )
+{
+    vec3 dcolor = texture(iChannel0, tex_coord).rgb;
+    vec3 r = 2.0 * dcolor;
+    vec3 a = 0.2 * dcolor;
+    float n = 64.0;
+    if ( inShadow ) {
+        return light.I_a * a;
+    }
+    else {
+        vec3 R = reflect( -L, N );
+        float N_dot_L = max( 0.0, dot( N, L ) );
+        float R_dot_V = max( 0.0, dot( R, V ) );
+        float R_dot_V_pow_n = ( R_dot_V == 0.0 )? 0.0 : pow( R_dot_V, n );
 
-
+        return light.I_a * a + 
+               light.I_source * (dcolor * N_dot_L + r * R_dot_V_pow_n);
+    }
+}
 /////////////////////////////////////////////////////////////////////////////
 // Casts a ray into the scene and returns color computed at the nearest
 // intersection point. The color is the sum of light from all light sources,
@@ -494,17 +520,6 @@ vec3 CastRay( in Ray_t ray,
             nearest_hitMatID = Sphere[i].materialID;
         }
     }
-    //calculate plane intersection
-    for(int i = 0; i < plane_num; i++){
-        temp_hasHit = IntersectPlane(Plane[i], ray, DEFAULT_TMIN, DEFAULT_TMAX, temp_t, temp_hitPos, temp_hitNormal);
-        if(temp_hasHit) hasHitSomething = true;
-        if(temp_hasHit && temp_t < nearest_t){
-            nearest_t = temp_t;
-            nearest_hitPos = temp_hitPos;
-            nearest_hitNormal = temp_hitNormal;
-            nearest_hitMatID = Plane[i].materialID;
-        }
-    }
 
     //calculate aabox intersection
     for(int i = 0; i < aabox_num; i++){
@@ -517,8 +532,21 @@ vec3 CastRay( in Ray_t ray,
             nearest_hitMatID = AABox[i].materialID;
         }
     }
-
-
+    //calculate plane intersection
+    bool is_plane = false;
+    Plane_t hit_plane;
+    for(int i = 0; i < plane_num; i++){
+        temp_hasHit = IntersectPlane(Plane[i], ray, DEFAULT_TMIN, DEFAULT_TMAX, temp_t, temp_hitPos, temp_hitNormal);
+        if(temp_hasHit) hasHitSomething = true;
+        if(temp_hasHit && temp_t < nearest_t){
+            nearest_t = temp_t;
+            nearest_hitPos = temp_hitPos;
+            nearest_hitNormal = temp_hitNormal;
+            is_plane = true;
+            hit_plane = Plane[i];
+            nearest_hitMatID = Plane[i].materialID;
+        }
+    }
     // One of the output results.
     hasHit = hasHitSomething;
     if ( !hasHitSomething ) return BACKGROUND_COLOR;
@@ -572,7 +600,14 @@ vec3 CastRay( in Ray_t ray,
         }
 
         //***phong lighting
-        vec3 phong = PhongLighting(shadowRay.d, nearest_hitNormal, -ray.d, isShadow, Material[nearest_hitMatID], Light[i]);
+        vec3 phong;
+        if(!is_plane || (is_plane && hit_plane.type == 0)){
+            phong = PhongLighting(shadowRay.d, nearest_hitNormal, -ray.d, isShadow, Material[nearest_hitMatID], Light[i]);
+        }
+        else{
+            vec2 tex_coord = nearest_hitPos.xz * 0.25;
+            phong = PhongLighting(shadowRay.d, nearest_hitNormal, -ray.d, isShadow, tex_coord, Light[i]); 
+        }
         I_local = I_local + phong;
     }
 

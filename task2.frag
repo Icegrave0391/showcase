@@ -400,7 +400,6 @@ vec3 CastRay( in Ray_t ray,
     }
 
     //calculate plane intersection
-
     bool is_plane = false;
     Plane_t hit_plane;
     for(int i = 0; i < plane_num; i++){
