@@ -231,6 +231,14 @@ vec3 changeCenter(vec3 centerOld) {
     return change;
 }
 
+// Direction
+void changeDirection() {
+	vec4 directionInfo = texture(iChannel0, vec2(0.0));
+    float dir = directionInfo.w;
+    
+    MOV_DIRECTION = int(dir);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Computes intersection between a sphere and a ray.
 // Returns true if there is an intersection where the ray parameter t is

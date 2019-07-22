@@ -22,11 +22,23 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
         //vec2 fwd = MOVE_SPEED * iTimeDelta * vec2(sin(col.a), cos(col.a));
         float moveLength = MOVE_SPEED * iTimeDelta * 0.25;
         
-        if (isKeyPressed(KEY_UP)) col.x += moveLength;
-        if (isKeyPressed(KEY_DOWN)) col.x -= moveLength;
+        if (isKeyPressed(KEY_UP)) {
+            col.x += moveLength;
+            col.w = 1.0;
+        }
+        if (isKeyPressed(KEY_DOWN)) {
+            col.x -= moveLength;
+            col.w = 2.0;
+        }
         
-        if (isKeyPressed(KEY_RIGHT)) col.z += moveLength;
-        if (isKeyPressed(KEY_LEFT)) col.z -= moveLength;
+        if (isKeyPressed(KEY_RIGHT)) {
+            col.z += moveLength;
+            col.w = 4.0;
+        }
+        if (isKeyPressed(KEY_LEFT)) {
+            col.z -= moveLength;
+            col.w = 3.0;
+        }
         
         //col.xz = min(col.xz, 9.3);
         //col.xz = max(col.xz, -9.3);
