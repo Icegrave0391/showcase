@@ -139,24 +139,29 @@ void init(){
 
 bool onBox(vec2 position2D){
     int flag = 0;
+    float curr_x = position2D.x;
+    float curr_z = position2D.y;
     for(int i = 0 ; i < NUM_AABOXES ; i++){
         float left_side = AABox[i].center.x - AABox[i].size.x * 0.5;
         float right_side = AABox[i].center.x + AABox[i].size.x * 0.5;
         float front_side = AABox[i].center.z + AABox[i].size.z * 0.5;
         float back_side = AABox[i].center.z - AABox[i].size.z * 0.5;
-        float curr_x = position2D.x;
-        float curr_z = position2D.y;
-
-        vec2 final_point = vec2(19.5, 37.5);
-        if(curr_x >= final_point.x - 0.5 && curr_x <= final_point.x + 0.5 && curr_z >= final_point.z - 0.5 && curr_z <= final_point.z + 0.5){
-            return false;
-        }
         if((curr_x >= left_side && curr_x <= right_side) && (curr_z >= back_side && curr_z <= front_side)){
             flag = 1;
             break;
         }
     }
     if(flag == 1) return true;
+    return false;
+}
+
+bool atEnd(vec2 position2D){
+    vec2 final_point = vec2(19.5, 37.5);
+    float curr_x = position2D.x;
+    float curr_z = position2D.y;
+    if(curr_x >= final_point.x - 0.5 && curr_x <= final_point.x + 0.5 && curr_z >= final_point.y - 0.5 && curr_z <= final_point.y + 0.5){
+        return true;
+    }
     return false;
 }
 
@@ -171,36 +176,38 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
         col = texture(iChannel0, uv);
         vec2 origin_pos = vec2(25.5, 1.5);
         float moveLength = MOVE_SPEED * iTimeDelta * 0.25;
+        if(!atEnd(origin_pos + col.xz)){
+            if (isKeyPressed(KEY_UP)) {
+                vec2 temp_pos = origin_pos + vec2(col.x, col.z + moveLength);
+                if(onBox(temp_pos)){
+                    col.z += moveLength;
+                    col.w = 1.0;
+                }
+            }
+            if (isKeyPressed(KEY_DOWN)) {
+                vec2 temp_pos = origin_pos + vec2(col.x, col.z - moveLength);
+                if(onBox(temp_pos)){
+                    col.z -= moveLength;
+                    col.w = 2.0;
+                }
+            }
         
-        if (isKeyPressed(KEY_UP)) {
-            vec2 temp_pos = origin_pos + vec2(col.x, col.z + moveLength);
-            if(onBox(temp_pos)){
-                col.z += moveLength;
-                col.w = 1.0;
+            if (isKeyPressed(KEY_RIGHT)) {
+                vec2 temp_pos = origin_pos + vec2(col.x - moveLength, col.z);
+                if(onBox(temp_pos)){
+                    col.x -= moveLength;
+                    col.w = 4.0;
+                }
             }
-        }
-        if (isKeyPressed(KEY_DOWN)) {
-            vec2 temp_pos = origin_pos + vec2(col.x, col.z - moveLength);
-            if(onBox(temp_pos)){
-                col.z -= moveLength;
-                col.w = 2.0;
+            if (isKeyPressed(KEY_LEFT)) {
+                vec2 temp_pos = origin_pos + vec2(col.x + moveLength, col.z);
+                if(onBox(temp_pos)){
+                    col.x += moveLength;
+                    col.w = 3.0;
+                }
             }
         }
         
-        if (isKeyPressed(KEY_RIGHT)) {
-            vec2 temp_pos = origin_pos + vec2(col.x - moveLength, col.z);
-            if(onBox(temp_pos)){
-                col.x -= moveLength;
-                col.w = 4.0;
-            }
-        }
-        if (isKeyPressed(KEY_LEFT)) {
-            vec2 temp_pos = origin_pos + vec2(col.x + moveLength, col.z);
-            if(onBox(temp_pos)){
-                col.x += moveLength;
-                col.w = 3.0;
-            }
-        }
         if (isKeyPressed(KEY_W)) {
             col = vec4(0.0);
         }
