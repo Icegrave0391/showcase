@@ -29,16 +29,14 @@
 // Constants.
 //============================================================================
 const int NUM_LIGHTS = 2;
-const int NUM_MATERIALS = 3;
-const int NUM_PLANES = 1;
+const int NUM_MATERIALS = 5;
+const int NUM_PLANES = 0;
 const int NUM_SPHERES = 1;
 const int NUM_AABOXES = 7;
 const int NUM_CONES = 6;
 
-const vec3 BACKGROUND_COLOR = vec3( 0.1, 0.2, 0.6 );
-
  // Vertical field-of-view angle of camera. In radians.
-const float FOVY = 50.0 * 3.1415926535 / 180.0; 
+const float FOVY = 55.0 * 3.1415926535 / 180.0; 
 
 // Use this for avoiding the "epsilon problem" or the shadow acne problem.
 const float DEFAULT_TMIN = 10.0e-4;
@@ -129,7 +127,7 @@ struct Material_t {
 //============================================================================
 // Global scene data.
 //============================================================================
-Plane_t Plane[NUM_PLANES];
+Plane_t Plane[1];
 Sphere_t Sphere[NUM_SPHERES];
 AABox_t AABox[NUM_AABOXES];
 Cone_t Cone[NUM_CONES];
@@ -185,13 +183,13 @@ void InitMap()
 
     Cone[2].cosa = 0.7;
     Cone[2].height = 0.5;
-    Cone[2].apex = vec3(20.0, 6.1, 29.5);
+    Cone[2].apex = vec3(20.0, 6.1 + 0.1 * cos(iTime), 29.5);
     Cone[2].axis = vec3(0.0, -1.0, 0.0);
     Cone[2].materialID = 2;
 
     Cone[3].cosa = 0.7;
     Cone[3].height = 0.5;
-    Cone[3].apex = vec3(20.0, 5.1, 29.5);
+    Cone[3].apex = vec3(20.0, 5.1 + 0.1 * cos(iTime), 29.5);
     Cone[3].axis = vec3(0.0, 1.0, 0.0);
     Cone[3].materialID = 2;
 
@@ -214,18 +212,19 @@ void InitMap()
 void InitScene()
 {
     // Horizontal plane.
-    Plane[0].A = 0.0;
-    Plane[0].B = 1.0;
-    Plane[0].C = 0.0;
-    Plane[0].D = 0.0;
-    Plane[0].type = 1;
-    Plane[0].materialID = 0;
+    //Plane[0].A = 0.0;
+    //Plane[0].B = 1.0;
+    //Plane[0].C = 0.0;
+    //Plane[0].D = 0.0;
+    //Plane[0].type = 1;
+    //Plane[0].materialID = 3;
 
     // Sphere.
     Sphere[0].center = vec3( 0.0, 3.6, 0.5 );
     Sphere[0].radius = 0.5;
     Sphere[0].materialID = 1;
     Sphere[0].BoxID = 0;
+    
     InitMap();
 
     // Silver material.
@@ -248,6 +247,18 @@ void InitScene()
     Material[2].k_r = vec3( 1.0, 1.0, 1.0 );
     Material[2].k_rg = 0.5 * Material[2].k_r;
     Material[2].n = 128.0;
+    
+    Material[3].k_d = vec3(0.714, 0.4284, 0.18144);
+    Material[3].k_a = vec3(0.2125, 0.1275, 0.054);
+    Material[3].k_r = vec3(0.393548, 0.271906, 0.166721);
+    Material[3].k_rg = 0.5 * Material[0].k_r;   
+    Material[3].n = 25.6;
+    
+    Material[4].k_d = vec3(0.61424, 0.04136, 0.04136);
+    Material[4].k_a = vec3(0.1745, 0.01175, 0.01175);
+    Material[4].k_r = vec3(0.727811, 0.626959, 0.626959);
+    Material[4].k_rg = 0.5 * Material[0].k_r;   
+    Material[4].n = 76.8;
 
     // Light 0.
     Light[0].position = vec3( 4.0, 8.0, -3.0 );
@@ -282,6 +293,9 @@ bool IntersectPlane( in Plane_t pln, in Ray_t ray, in float tmin, in float tmax,
     // We have a hit -- output results.
     t = t0;
     hitPos = ray.o + t0 * ray.d;
+    if (hitPos.x < -50.0 || hitPos.x > 50.0 ||
+        hitPos.z < -50.0 || hitPos.z > 50.0)
+        return false;
     hitNormal = normalize( N );
     return true;
 }
@@ -300,6 +314,12 @@ bool IntersectPlane( in Plane_t pln, in Ray_t ray, in float tmin, in float tmax 
     float NRo = dot( N, ray.o );
     float t0 = (-pln.D - NRo) / NRd;
     if ( t0 < tmin || t0 > tmax ) return false;
+
+    float t = t0;
+    vec3 hitPos = ray.o + t0 * ray.d;
+    if (hitPos.x < -50.0 || hitPos.x > 50.0 ||
+        hitPos.z < -50.0 || hitPos.z > 50.0)
+        return false;
     return true;
 }
 
@@ -835,8 +855,9 @@ vec3 CastRay( in Ray_t ray,
     }
     // One of the output results.
     hasHit = hasHitSomething;
-    if ( !hasHitSomething ) return BACKGROUND_COLOR;
-
+    if ( !hasHitSomething ) {
+        return texture(iChannel2, ray.d).xyz;
+    }
     vec3 I_local = vec3( 0.0 );  // Result color will be accumulated here.
 
     /////////////////////////////////////////////////////////////////////////////
