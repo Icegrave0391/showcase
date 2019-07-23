@@ -163,7 +163,7 @@ void InitMap()
     AABox[5].size = vec3(10.0, 0.2, 1.0);
     AABox[5].materialID = 0;
 
-    AABox[6].center = vec3(10.5, 3.0, 29.5);
+    AABox[6].center = vec3(15.5, 3.0, 29.5);
     AABox[6].size = vec3(10.0, 0.2, 1.0);
     AABox[6].materialID = 0;
 
@@ -176,7 +176,7 @@ void InitMap()
 
     Cone[1].cosa = 0.9;
     Cone[1].height = 1.0;
-    Cone[1].apex = vec3(15.0, 6.1, 34);
+    Cone[1].apex = vec3(20.0, 6.1, 29.5);
     Cone[1].axis = vec3(0.0, -1.0, 0.0);
     Cone[1].materialID = 2;
 
@@ -876,24 +876,19 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     
     // Camera Setup
     vec2 mouse = iMouse.xy / iResolution.xy * .5;
-
-    vec3 cameraAt = Sphere[0].center;
-
     float angleX = iMouse.z > 0.0 ? 6.28 * mouse.x : 3.14 + 0.0;
-    float angleY = iMouse.z > 0.0 ? (mouse.y * 6.28) - 0.4 : 0.5;
-    vec3 cameraPos	= cameraAt + (vec3(sin(angleX)*cos(angleY), sin(angleY), cos(angleX)*cos(angleY))) * 3.0;
-
-    vec3 cameraFwd  = normalize(cameraAt - cameraPos);
-    vec3 cameraLeft  = normalize(cross(normalize(cameraAt - cameraPos), vec3(0.0,sign(cos(angleY)),0.0)));
-    vec3 cameraUp   = normalize(cross(cameraLeft, cameraFwd));
-
-    // Position the camera.
-    vec3 cam_pos = cameraPos;
-    vec3 cam_lookat = Sphere[0].center;
-    vec3 cam_up_vec = normalize(cross(cameraLeft, cameraFwd));
+    float angleY = iMouse.z > 0.0 ? (mouse.y * 6.28) - 0.4 : 0.3;
+    
+    vec3 cam_angle = (vec3(sin(angleX)*cos(angleY), sin(angleY), cos(angleX)*cos(angleY))) * 8.0;
+	vec3 cam_lookat = Sphere[0].center;
+    vec3 cam_pos = cam_lookat + cam_angle;
+    
+    vec3 cam_fwd  = normalize(-cam_angle);
+    vec3 cam_left = normalize(cross(cam_fwd, vec3(0.0, sign(cos(angleY)), 0.0)));
+    vec3 cam_up_vec = normalize(cross(cam_left, cam_fwd));
 
     // Set up camera coordinate frame in world space.
-    vec3 cam_z_axis = normalize( cam_pos - cam_lookat );
+    vec3 cam_z_axis = normalize( cam_angle );
     vec3 cam_x_axis = normalize( cross(cam_up_vec, cam_z_axis) );
     vec3 cam_y_axis = normalize( cross(cam_z_axis, cam_x_axis));
     
