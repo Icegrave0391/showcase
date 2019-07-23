@@ -33,7 +33,7 @@ const int NUM_MATERIALS = 3;
 const int NUM_PLANES = 1;
 const int NUM_SPHERES = 1;
 const int NUM_AABOXES = 7;
-const int NUM_CONES = 2;
+const int NUM_CONES = 3;
 
 const vec3 BACKGROUND_COLOR = vec3( 0.1, 0.2, 0.6 );
 
@@ -54,8 +54,7 @@ const float INTERVAL = 0.5;
 
 //direction
 int MOV_DIRECTION = 0; // 1:up, 2:down, 3:left, 4:right
-float PREV_TIME = 0.0;
-float CURR_TIME = 0.0;
+float PREV_TIME, CURR_TIME;
 
 //============================================================================
 // Define new struct types.
@@ -180,6 +179,12 @@ void InitMap()
     Cone[1].apex = vec3(15.0, 6.1, 34);
     Cone[1].axis = vec3(0.0, -1.0, 0.0);
     Cone[1].materialID = 2;
+
+    Cone[2].cosa = 0.95;
+    Cone[2].height = 0.3;
+    Cone[2].apex = vec3(Sphere[0].center.x, 4.1, Sphere[0].center.z);
+    Cone[2].axis = vec3(0.0, 1.0, 0.0);
+    Cone[2].materialID = 2;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -612,6 +617,7 @@ void drop(Sphere_t sphere, AABox_t box, int side){
             sphere.center.x += sin(theta_t * delta_time);
         }
     }
+    float vert_time = iTime;
     float g = 9.8;
     //直线
     // while(sphere.center.y >= 0.0){
@@ -621,30 +627,30 @@ void drop(Sphere_t sphere, AABox_t box, int side){
 
 void dropDetection(Sphere_t sphere)
 {   
-    vec3 cur_center = sphere.center;
-    float radius = sphere.radius;
-    for(int i = 0 ; i < NUM_AABOXES ; i++){
-        float front_side = AABox[i].center.z + 0.5 * AABox[i].size.z;
-        float right_side = AABox[i].center.x + 0.5 * AABox[i].size.x;
-        float back_side = AABox[i].center.z - 0.5 * AABox[i].size.z;
-        float left_side = AABox[i].center.x - 0.5 * AABox[i].size.x;
-        if(cur_center.z >= front_side){
-            drop(sphere, AABox[i], 1);
-            break;
-        }
-        if(cur_center.z <= back_side ){
-            drop(sphere, AABox[i], 2);
-            break;
-        }
-        if(cur_center.x <= left_side ){
-            drop(sphere, AABox[i], 3);
-            break;
-        }
-        if(cur_center.x >= right_side){
-            drop(sphere, AABox[i], 4);
-            break;
-        }
-    }
+    // vec3 cur_center = sphere.center;
+    // float radius = sphere.radius;
+    // for(int i = 0 ; i < NUM_AABOXES ; i++){
+    //     float front_side = AABox[i].center.z + 0.5 * AABox[i].size.z;
+    //     float right_side = AABox[i].center.x + 0.5 * AABox[i].size.x;
+    //     float back_side = AABox[i].center.z - 0.5 * AABox[i].size.z;
+    //     float left_side = AABox[i].center.x - 0.5 * AABox[i].size.x;
+    //     if(cur_center.z >= front_side){
+    //         drop(sphere, AABox[i], 1, iTime);
+    //         break;
+    //     }
+    //     if(cur_center.z <= back_side ){
+    //         drop(sphere, AABox[i], 2, iTime);
+    //         break;
+    //     }
+    //     if(cur_center.x <= left_side ){
+    //         drop(sphere, AABox[i], 3, iTime);
+    //         break;
+    //     }
+    //     if(cur_center.x >= right_side){
+    //         drop(sphere, AABox[i], 4, iTime);
+    //         break;
+    //     }
+    // }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -854,40 +860,51 @@ vec3 CastRay( in Ray_t ray,
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
     InitScene();
-
+    
+    // Sphere move 
+    vec3 move = changeCenter(Sphere[0].center);
+    Sphere[0].center.x = move.x; 
+    Sphere[0].center.y = move.y + Sphere[0].center.y;
+    Sphere[0].center.z = move.z + Sphere[0].center.z;
+    Cone[2].apex = vec3(Sphere[0].center.x, 4.5, Sphere[0].center.z);
+    
+    // dropDetection(Sphere[i]);
+    
     // Scale pixel 2D position such that its y coordinate is in [-1.0, 1.0].
     vec2 pixel_pos = (2.0 * fragCoord.xy - iResolution.xy) / iResolution.y;
+    
+    
+    // Camera Setup
+    vec2 mouse = iMouse.xy / iResolution.xy * .5;
+
+    vec3 cameraAt = Sphere[0].center;
+
+    float angleX = iMouse.z > 0.0 ? 6.28 * mouse.x : 3.14 + 0.0;
+    float angleY = iMouse.z > 0.0 ? (mouse.y * 6.28) - 0.4 : 0.5;
+    vec3 cameraPos	= cameraAt + (vec3(sin(angleX)*cos(angleY), sin(angleY), cos(angleX)*cos(angleY))) * 3.0;
+
+    vec3 cameraFwd  = normalize(cameraAt - cameraPos);
+    vec3 cameraLeft  = normalize(cross(normalize(cameraAt - cameraPos), vec3(0.0,sign(cos(angleY)),0.0)));
+    vec3 cameraUp   = normalize(cross(cameraLeft, cameraFwd));
 
     // Position the camera.
-    // vec3 cam_pos = vec3( 10.0 * cos(.5 * iTime), 5.0, 10.0 * sin(.5 * iTime) );
-    vec3 cam_pos = vec3(10, 10, 0);
-    vec3 cam_lookat = vec3( 2.5, 0.0, -1.0 );
-    vec3 cam_up_vec = vec3( 0.0, 1.0, 0.0 );
+    vec3 cam_pos = cameraPos;
+    vec3 cam_lookat = Sphere[0].center;
+    vec3 cam_up_vec = normalize(cross(cameraLeft, cameraFwd));
 
     // Set up camera coordinate frame in world space.
     vec3 cam_z_axis = normalize( cam_pos - cam_lookat );
     vec3 cam_x_axis = normalize( cross(cam_up_vec, cam_z_axis) );
     vec3 cam_y_axis = normalize( cross(cam_z_axis, cam_x_axis));
-
-    // Set up view transformation
     
-    //
-
+    // Initialize scene
+	
 
     // Create primary ray.
     float pixel_pos_z = -1.0 / tan(FOVY / 2.0);
     Ray_t pRay;
     pRay.o = cam_pos;
     pRay.d = normalize( pixel_pos.x * cam_x_axis  +  pixel_pos.y * cam_y_axis  +  pixel_pos_z * cam_z_axis );
-
-    //moving 
-    vec3 move = changeCenter(Sphere[0].center);
-    Sphere[0].center.x = move.x; 
-    Sphere[0].center.y = move.y + Sphere[0].center.y;
-    Sphere[0].center.z = move.z + Sphere[0].center.z;
-    //drop detection
-    CURR_TIME = iTime;
-        //     // dropDetection(Sphere[i]);
 
     // Start Ray Tracing.
     // Use iterations to emulate the recursion.
@@ -911,6 +928,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
         nextRay = Ray_t( hitPos, normalize( reflect(nextRay.d, hitNormal) ) );
     }
-    PREV_TIME = iTime;
+
     fragColor = vec4( I_result, 1.0 );
 }
