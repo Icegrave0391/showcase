@@ -29,8 +29,8 @@
 // Constants.
 //============================================================================
 const int NUM_LIGHTS = 2;
-const int NUM_MATERIALS = 5;
-const int NUM_PLANES = 2;
+const int NUM_MATERIALS = 6;
+const int NUM_PLANES = 0;
 const int NUM_SPHERES = 1;
 const int NUM_AABOXES = 29;
 const int NUM_CONES = 6;
@@ -127,7 +127,7 @@ struct Material_t {
 //============================================================================
 // Global scene data.
 //============================================================================
-Plane_t Plane[NUM_PLANES];
+Plane_t Plane[1];
 Sphere_t Sphere[NUM_SPHERES];
 AABox_t AABox[NUM_AABOXES];
 Cone_t Cone[NUM_CONES];
@@ -140,6 +140,33 @@ Material_t Material[NUM_MATERIALS];
 void InitMap()
 {
     // AABox.
+    // AABox[0].center = vec3(0.0, 3.0, 5.0);
+    // AABox[0].size = vec3(1.0, 0.2, 10.0);
+    // AABox[0].materialID = 0;
+
+    // AABox[1].center = vec3(5.5, 3.0, 9.5);
+    // AABox[1].size = vec3(10.0, 0.2, 1.0);
+    // AABox[1].materialID = 0;
+
+    // AABox[2].center = vec3(10.0, 3.0, 15.0);
+    // AABox[2].size = vec3(1.0, 0.2, 10.0);
+    // AABox[2].materialID = 0;
+
+    // AABox[3].center = vec3(4.5, 3.0, 19.5);
+    // AABox[3].size = vec3(10.0, 0.2, 1.0);
+    // AABox[3].materialID = 0;
+
+    // AABox[4].center = vec3(0.0, 3.0, 25.0);
+    // AABox[4].size = vec3(1.0, 0.2, 10.0);
+    // AABox[4].materialID = 0;
+
+    // AABox[5].center = vec3(5.5, 3.0, 29.5);
+    // AABox[5].size = vec3(10.0, 0.2, 1.0);
+    // AABox[5].materialID = 0;
+
+    // AABox[6].center = vec3(15.5, 3.0, 29.5);
+    // AABox[6].size = vec3(10.0, 0.2, 1.0);
+    // AABox[6].materialID = 0;
     AABox[0].center = vec3(13.5, 3.0, 1.5);
     AABox[0].size = vec3(27.0, 0.2, 3.0);
     AABox[0].materialID = 0;
@@ -306,13 +333,6 @@ void InitScene()
     Plane[0].type = 0;
     Plane[0].materialID = 3;
 
-    //Vertical plane
-    Plane[1].A = 0.0;
-    Plane[1].B = 0.0;
-    Plane[1].C = 1.0;
-    Plane[1].D = -45.0;
-    Plane[1].type = 0;
-    Plane[1].materialID = 3;
     // Sphere.
     Sphere[0].center = vec3( 25.5, 3.6, 1.5 );
     Sphere[0].radius = 0.5;
@@ -322,11 +342,11 @@ void InitScene()
     InitMap();
 
     // Silver material.
-    Material[0].k_d = vec3( 0.5, 0.5, 0.5 );
-    Material[0].k_a = 0.2 * Material[0].k_d;
-    Material[0].k_r = 2.0 * Material[0].k_d;
-    Material[0].k_rg = 0.5 * Material[0].k_r;   
-    Material[0].n = 64.0;
+    //Material[0].k_d = vec3( 0.5, 0.5, 0.5 );
+    //Material[0].k_a = 0.2 * Material[0].k_d;
+    //Material[0].k_r = 2.0 * Material[0].k_d;
+    //Material[0].k_rg = 0.5 * Material[0].k_r;   
+    //Material[0].n = 64.0;
 
     // Gold material.
     Material[1].k_d = vec3( 0.8, 0.7, 0.1 );
@@ -353,6 +373,12 @@ void InitScene()
     Material[4].k_r = vec3(0.727811, 0.626959, 0.626959);
     Material[4].k_rg = 0.5 * Material[0].k_r;   
     Material[4].n = 76.8;
+    
+    Material[0].k_d = vec3(0.0, 0.0, 0.0);
+    Material[0].k_a = vec3(0.1745, 0.01175, 0.01175);
+    Material[0].k_r = vec3(0.0, 0.0, 0.0);
+    Material[0].k_rg = 0.5 * Material[0].k_r;   
+    Material[0].n = 20.0;
 
     // Light 0.
     Light[0].position = vec3( 4.0, 8.0, -3.0 );
@@ -550,7 +576,13 @@ bool IntersectAABox( in AABox_t box, in Ray_t ray, in float tmin, in float tmax,
         }
     }
 
-    t = t_min;
+
+    bool isInside = (t_min == tmin);
+    if(isInside)
+        t = t_max;
+    else
+        t = t_min;
+
     hitPos = ray.o + t * ray.d;
     
     float closestDist = tmax;
@@ -569,6 +601,8 @@ bool IntersectAABox( in AABox_t box, in Ray_t ray, in float tmin, in float tmax,
 				hitNormal[axis] =  1.0;
 		}
 	}
+    if(isInside)
+        hitNormal *= -1.0;
     return true;
 }
 
@@ -721,104 +755,6 @@ vec3 PhongLighting( in vec3 L, in vec3 N, in vec3 V, in bool inShadow,
                light.I_source * (dcolor * N_dot_L + r * R_dot_V_pow_n);
     }
 }
-// //*********************************
-// //:::::::DROP   DETECTION:::::::://
-// //*********************************
-// //side = 1 : front, side = 2: back, side = 3: left, side = 4: right
-// bool onBox(Sphere_t sphere, AABox_t box){
-//     float left_side = box.center.x - box.size.x * 0.5;
-//     float right_side = box.center.x + box.size.x * 0.5;
-//     float front_side = box.center.z + box.size.z * 0.5;
-//     float back_side = box.center.z - box.size.z * 0.5;
-//     float curr_x = sphere.center.x;
-//     float curr_z = sphere.center.z;
-//     if((curr_x >= left_side && curr_x <= right_side) && (curr_z >= back_side && curr_z <= front_side)) return true;
-//     return false;
-// }
-
-// void drop(Sphere_t sphere, AABox_t box, int side){
-//     AABox[0].materialID = 1;
-//     float theta_t = 30.0;
-//     float delta_time = CURR_TIME - PREV_TIME;
-//     if(sphere.center.y >= box.center.y){           //弧线
-//         sphere.center.y -= sphere.radius * (1.0 - cos(theta_t * delta_time));
-//         if(side == 1){
-//             sphere.center.z += sin(theta_t * delta_time);
-//         }
-//         if(side == 2){
-//             sphere.center.z -= sin(theta_t * delta_time);
-//         }
-//         if(side == 3){
-//             sphere.center.x -= sin(theta_t * delta_time);
-//         }
-//         if(side == 4){
-//             sphere.center.x += sin(theta_t * delta_time);
-//         }
-//     }
-//     float vert_time = iTime;
-//     float g = 9.8;
-//     //直线
-//     // while(sphere.center.y >= 0.0){
-//     //     sphere.center.y = box.center.y - 0.5 * g * (iTime - vert_time) * (iTime - vert_time);
-//     // }
-// }
-
-// void dropDetection(Sphere_t sphere)
-// { 
-//     vec3 cur_center = sphere.center;
-//     float radius = sphere.radius;
-//     int should_drop = 0;
-//     if(sphere.BoxID == 0){
-//         if(onBox(sphere, AABox[0])){
-//             sphere.BoxID = 0;
-//             should_drop = 0;
-//         }
-//         else if(onBox(sphere, AABox[1])){
-//             sphere.BoxID = 1;
-//             should_drop = 0;
-//         }
-//         else{
-//             sphere.BoxID = 0;
-//             should_drop = 1;
-//         }
-//     }
-//     else{
-//         if(onBox(sphere, AABox[sphere.BoxID])){
-//             sphere.BoxID = sphere.BoxID;
-//             should_drop = 0;
-//         }
-//         else if(onBox(sphere, AABox[sphere.BoxID + 1])){
-//             sphere.BoxID += 1;
-//             should_drop = 0;
-//         }
-//         else if(onBox(sphere, AABox[sphere.BoxID - 1])){
-//             sphere.BoxID -= 1;
-//             should_drop = 0;
-//         }
-//         else{
-//             sphere.BoxID = sphere.BoxID;
-//             should_drop = 1;
-//         }
-//     }
-//     if(should_drop == 1){
-//         float front_side = AABox[sphere.BoxID].center.z + 0.5 * AABox[sphere.BoxID].size.z;
-//         float right_side = AABox[sphere.BoxID].center.x + 0.5 * AABox[sphere.BoxID].size.x;
-//         float back_side = AABox[sphere.BoxID].center.z - 0.5 * AABox[sphere.BoxID].size.z;
-//         float left_side = AABox[sphere.BoxID].center.x - 0.5 * AABox[sphere.BoxID].size.x;
-//         if(cur_center.z >= front_side){
-//             drop(sphere, AABox[sphere.BoxID], 1);
-//         }
-//         if(cur_center.z <= back_side ){
-//             drop(sphere, AABox[sphere.BoxID], 2);
-//         }
-//         if(cur_center.x <= left_side ){
-//             drop(sphere, AABox[sphere.BoxID], 3);
-//         }
-//         if(cur_center.x >= right_side){
-//             drop(sphere, AABox[sphere.BoxID], 4);
-//         }
-//     }
-// }
 
 /////////////////////////////////////////////////////////////////////////////
 // Casts a ray into the scene and returns color computed at the nearest
@@ -863,7 +799,6 @@ vec3 CastRay( in Ray_t ray,
     int plane_num = NUM_PLANES;
     int sphere_num = NUM_SPHERES;
     int aabox_num = NUM_AABOXES;
-    bool is_box = false;
     //calculate sphere intersection
     for(int i = 0; i < sphere_num; i++){
 		temp_hasHit = IntersectSphere( Sphere[i], ray, DEFAULT_TMIN, DEFAULT_TMAX,
@@ -883,7 +818,7 @@ vec3 CastRay( in Ray_t ray,
         temp_hasHit = IntersectAABox(AABox[i], ray, DEFAULT_TMIN, DEFAULT_TMAX, temp_t, temp_hitPos, temp_hitNormal);
         if(temp_hasHit) hasHitSomething = true;
         if(temp_hasHit && temp_t < nearest_t){
-            is_box = true;
+            isRefract = true;
             nearest_t = temp_t;
             nearest_hitPos = temp_hitPos;
             nearest_hitNormal = temp_hitNormal;
@@ -897,7 +832,7 @@ vec3 CastRay( in Ray_t ray,
         if(temp_hasHit) hasHitSomething = true;
         if(temp_hasHit && temp_t < nearest_t){
             nearest_t = temp_t;
-            is_box = false;
+            isRefract = false;
             nearest_hitPos = temp_hitPos;
             nearest_hitNormal = temp_hitNormal;
             nearest_hitMatID = Cone[i].materialID;
@@ -913,7 +848,7 @@ vec3 CastRay( in Ray_t ray,
         if(temp_hasHit) hasHitSomething = true;
         if(temp_hasHit && temp_t < nearest_t){
             nearest_t = temp_t;
-            is_box = false;
+            isRefract = false;
             nearest_hitPos = temp_hitPos;
             nearest_hitNormal = temp_hitNormal;
             is_plane = true;
@@ -924,8 +859,7 @@ vec3 CastRay( in Ray_t ray,
     // One of the output results.
     hasHit = hasHitSomething;
     if ( !hasHitSomething ) {
-        // return texture(iChannel2, ray.d).xyz;
-        return vec3(0, 0, 0);
+        return texture(iChannel2, ray.d).xyz;
     }
     vec3 I_local = vec3( 0.0 );  // Result color will be accumulated here.
 
@@ -942,7 +876,8 @@ vec3 CastRay( in Ray_t ray,
     /////////////////////////////////
     // TASK: WRITE YOUR CODE HERE. //
     /////////////////////////////////
-    for(int i = 0; i < NUM_LIGHTS; i++){
+    for(int i = 0; i < NUM_LIGHTS; i++) {
+
         //***for each light source, make a shadow ray
         Ray_t shadowRay;
         shadowRay.o = nearest_hitPos;
@@ -988,8 +923,6 @@ vec3 CastRay( in Ray_t ray,
         vec3 phong;
         if(!is_plane || (is_plane && hit_plane.type == 0)) {
             phong = PhongLighting(shadowRay.d, nearest_hitNormal, -ray.d, isShadow, Material[nearest_hitMatID], Light[i]);
-            if (is_box)
-                isRefract = true;
         }
         else {
             vec2 tex_coord = nearest_hitPos.xz * 0.25;
@@ -1086,6 +1019,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
         bool isRefract;
         vec3 I_result = vec3( 0.0 );
+        vec3 refraction = vec3(0.0);
         vec3 compounded_k_rg = vec3( 1.0 );
         Ray_t nextRay = pRay;
 
@@ -1096,16 +1030,24 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
             vec3 I_local = CastRay( nextRay, hasHit, isRefract, hitPos, hitNormal, k_rg );
 
-            I_result += compounded_k_rg * I_local;
-
+            
+            if (isRefract) {
+                I_result += 0.0 * I_local;
+            }
+            else
+            {
+                I_result += compounded_k_rg * I_local;
+                compounded_k_rg *= k_rg;
+            }
+                
+                
+            
             if ( !hasHit ) break;
 
-            compounded_k_rg *= k_rg;
-
-            //if (!isRefract)
+            if (!isRefract)
                 nextRay = Ray_t( hitPos, normalize( reflect(nextRay.d, hitNormal) ) );
-            //else
-                //nextRay = Ray_t( hitPos, normalize( refract(nextRay.d, hitNormal, 0.7) ) );
+            else
+                nextRay = Ray_t( hitPos, normalize( refract(nextRay.d, hitNormal, 0.8) ) );
         }
 
         fragColor = vec4( I_result, 1.0 );
