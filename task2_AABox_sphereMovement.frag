@@ -225,7 +225,7 @@ bool IntersectPlane( in Plane_t pln, in Ray_t ray, in float tmin, in float tmax 
 
 // Movement of the sphere
 vec3 changeCenter(vec3 centerOld) {
-	vec4 sphereInfo = texture(iChannel0, vec2(0.0));
+	vec4 sphereInfo = texture(iChannel1, vec2(0.0));
     vec3 change = sphereInfo.xyz;
     
     return change;
@@ -233,7 +233,7 @@ vec3 changeCenter(vec3 centerOld) {
 
 // Direction
 void changeDirection() {
-	vec4 directionInfo = texture(iChannel0, vec2(0.0));
+	vec4 directionInfo = texture(iChannel1, vec2(0.0));
     float dir = directionInfo.w;
     
     MOV_DIRECTION = int(dir);
@@ -532,6 +532,7 @@ vec3 CastRay( in Ray_t ray,
         
         if(i == 0) {
         	vec3 move = changeCenter(Sphere[i].center);
+            changeDirection();
             
             Sphere[i].center.x = move.x;
             Sphere[i].center.y = move.y + 3.6;
