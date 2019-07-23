@@ -1,5 +1,3 @@
-
-    
 //============================================================================
 // PROJECT ID:
 //
@@ -34,7 +32,8 @@ const int NUM_LIGHTS = 2;
 const int NUM_MATERIALS = 3;
 const int NUM_PLANES = 1;
 const int NUM_SPHERES = 1;
-const int NUM_AABOXES = 1;
+const int NUM_AABOXES = 7;
+const int NUM_CONES = 2;
 
 const vec3 BACKGROUND_COLOR = vec3( 0.1, 0.2, 0.6 );
 
@@ -89,6 +88,14 @@ struct AABox_t {
     int materialID;
 };
 
+struct Cone_t {
+    float cosa;
+    float height;
+    vec3 apex;
+    vec3 axis;
+    int materialID;
+};
+
 struct Light_t {
     vec3 position;  // Point light 3D position.
     vec3 I_a;       // For Ambient.
@@ -122,10 +129,57 @@ struct Material_t {
 Plane_t Plane[NUM_PLANES];
 Sphere_t Sphere[NUM_SPHERES];
 AABox_t AABox[NUM_AABOXES];
+Cone_t Cone[NUM_CONES];
 Light_t Light[NUM_LIGHTS];
 Material_t Material[NUM_MATERIALS];
 
+/////////////////////////////////////////////////////////////////////////////
+// Initializes the map.
+/////////////////////////////////////////////////////////////////////////////
+void InitMap()
+{
+    // AABox.
+    AABox[0].center = vec3(0.0, 3.0, 5.0);
+    AABox[0].size = vec3(1.0, 0.2, 10.0);
+    AABox[0].materialID = 0;
 
+    AABox[1].center = vec3(5.5, 3.0, 9.5);
+    AABox[1].size = vec3(10.0, 0.2, 1.0);
+    AABox[1].materialID = 0;
+
+    AABox[2].center = vec3(10.0, 3.0, 15.0);
+    AABox[2].size = vec3(1.0, 0.2, 10.0);
+    AABox[2].materialID = 0;
+
+    AABox[3].center = vec3(4.5, 3.0, 19.5);
+    AABox[3].size = vec3(10.0, 0.2, 1.0);
+    AABox[3].materialID = 0;
+
+    AABox[4].center = vec3(0.0, 3.0, 25.0);
+    AABox[4].size = vec3(1.0, 0.2, 10.0);
+    AABox[4].materialID = 0;
+
+    AABox[5].center = vec3(5.5, 3.0, 29.5);
+    AABox[5].size = vec3(10.0, 0.2, 1.0);
+    AABox[5].materialID = 0;
+
+    AABox[6].center = vec3(10.5, 3.0, 29.5);
+    AABox[6].size = vec3(10.0, 0.2, 1.0);
+    AABox[6].materialID = 0;
+
+    // Cone.
+    Cone[0].cosa = 0.9;
+    Cone[0].height = 1.0;
+    Cone[0].apex = vec3(0.0, 6.1, 0.5);
+    Cone[0].axis = vec3(0.0, -1.0, 0.0);
+    Cone[0].materialID = 2;
+
+    Cone[1].cosa = 0.9;
+    Cone[1].height = 1.0;
+    Cone[1].apex = vec3(15.0, 6.1, 34);
+    Cone[1].axis = vec3(0.0, -1.0, 0.0);
+    Cone[1].materialID = 2;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // Initializes the scene.
@@ -140,20 +194,18 @@ void InitScene()
     Plane[0].type = 1;
     Plane[0].materialID = 0;
 
-    AABox[0].center = vec3(0.0, 3.0, 5.0);
-    AABox[0].size = vec3(2.0, 0.2, 10.0);
-    AABox[0].materialID = 0;
-
     // Sphere.
     Sphere[0].center = vec3( 0.0, 3.6, 0.5 );
     Sphere[0].radius = 0.5;
     Sphere[0].materialID = 1;
 
+    InitMap();
+
     // Silver material.
     Material[0].k_d = vec3( 0.5, 0.5, 0.5 );
     Material[0].k_a = 0.2 * Material[0].k_d;
     Material[0].k_r = 2.0 * Material[0].k_d;
-    Material[0].k_rg = 0.5 * Material[0].k_r;
+    Material[0].k_rg = 0.5 * Material[0].k_r;   
     Material[0].n = 64.0;
 
     // Gold material.
@@ -442,6 +494,60 @@ bool IntersectAABox( in AABox_t box, in Ray_t ray, in float tmin, in float tmax 
     return true;
 }
 
+bool IntersectCone( in Cone_t cone, in Ray_t ray, in float tmin, in float tmax,
+                      out float t, out vec3 hitPos, out vec3 hitNormal ) 
+{
+    vec3 co = ray.o - cone.apex;
+    float a = dot(ray.d, cone.axis) * dot(ray.d, cone.axis) - cone.cosa * cone.cosa;
+    float b = 2.0 * (dot(ray.d, cone.axis)*dot(co, cone.axis) - dot(ray.d, co) * cone.cosa * cone.cosa);
+    float c = dot(co, cone.axis) * dot(co, cone.axis) - dot(co, co) * cone.cosa * cone.cosa;
+
+    float det = b * b - 4.0 * a * c;
+    if (det < 0.0) return false;
+
+    det = sqrt(det);
+    float t1 = (-b - det) / (2.0 * a);
+    float t2 = (-b + det) / (2.0 * a);
+
+    t = t1;
+    if (t < tmin || t2 > tmin && t2 < t) t = t2;
+    if (t < tmin || t > tmax) return false;
+
+    hitPos = ray.o + t * ray.d;
+    vec3 cp = hitPos - cone.apex;
+    float h = dot(cp, cone.axis);
+    if (h < 0. || h > cone.height) return false;
+
+    hitNormal = normalize(cp * dot(cone.axis, cp) / dot(cp, cp) - cone.axis);
+
+    return true;
+}
+
+bool IntersectCone( in Cone_t cone, in Ray_t ray, in float tmin, in float tmax )
+{
+    vec3 co = ray.o - cone.apex;
+    float a = dot(ray.d, cone.axis) * dot(ray.d, cone.axis) - cone.cosa * cone.cosa;
+    float b = 2.0 * (dot(ray.d, cone.axis) * dot(co, cone.axis) - dot(ray.d, co) * cone.cosa * cone.cosa);
+    float c = dot(co, cone.axis) * dot(co, cone.axis) - dot(co, co) * cone.cosa * cone.cosa;
+        
+    float det = b * b - 4.0 * a * c;
+    if (det < 0.0) return false;
+
+    det = sqrt(det);
+    float t1 = (-b - det) / (2.0 * a);
+    float t2 = (-b + det) / (2.0 * a);
+
+    float t = t1;
+    if (t < tmin || t2 > tmin && t2 < t) t = t2;
+    if (t < tmin || t > tmax) return false;
+
+    vec3 cp = ray.o + t * ray.d - cone.apex;
+    float h = dot(cp, cone.axis);
+    if (h < 0.0 || h > cone.height) return false;
+
+    return true;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Computes (I_a * k_a) + k_shadow * I_source * [ k_d * (N.L) + k_r * (R.V)^n ].
@@ -629,6 +735,19 @@ vec3 CastRay( in Ray_t ray,
             nearest_hitMatID = AABox[i].materialID;
         }
     }
+
+    // calculate cone intersection
+    for(int i = 0; i < NUM_CONES; i++){
+        temp_hasHit = IntersectCone(Cone[i], ray, DEFAULT_TMIN, DEFAULT_TMAX, temp_t, temp_hitPos, temp_hitNormal);
+        if(temp_hasHit) hasHitSomething = true;
+        if(temp_hasHit && temp_t < nearest_t){
+            nearest_t = temp_t;
+            nearest_hitPos = temp_hitPos;
+            nearest_hitNormal = temp_hitNormal;
+            nearest_hitMatID = Cone[i].materialID;
+        }
+    }
+
     //calculate plane intersection
     bool is_plane = false;
     Plane_t hit_plane;
@@ -690,6 +809,15 @@ vec3 CastRay( in Ray_t ray,
         if(!isShadow){
             for(int n = 0; n < NUM_AABOXES; n++){
                 if(IntersectAABox(AABox[n], shadowRay, DEFAULT_TMIN, max_dis)){
+                    isShadow = true;
+                    break;
+                }
+            }
+        }
+
+        if(!isShadow){
+            for(int n = 0; n < NUM_CONES; n++){
+                if(IntersectCone(Cone[n], shadowRay, DEFAULT_TMIN, max_dis)){
                     isShadow = true;
                     break;
                 }
@@ -785,4 +913,3 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
     fragColor = vec4( I_result, 1.0 );
 }
-
