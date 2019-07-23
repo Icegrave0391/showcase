@@ -32,7 +32,7 @@ const int NUM_LIGHTS = 2;
 const int NUM_MATERIALS = 5;
 const int NUM_PLANES = 0;
 const int NUM_SPHERES = 1;
-const int NUM_AABOXES = 7;
+const int NUM_AABOXES = 29;
 const int NUM_CONES = 6;
 
  // Vertical field-of-view angle of camera. In radians.
@@ -334,7 +334,7 @@ void InitScene()
     //Plane[0].materialID = 3;
 
     // Sphere.
-    Sphere[0].center = vec3( 0.0, 3.6, 0.5 );
+    Sphere[0].center = vec3( 25.5, 3.6, 1.5 );
     Sphere[0].radius = 0.5;
     Sphere[0].materialID = 1;
     Sphere[0].BoxID = 0;
@@ -1063,8 +1063,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     
     // Sphere move 
     vec3 move = changeCenter(Sphere[0].center);
-    Sphere[0].center.x = move.x; 
-    Sphere[0].center.y = move.y + Sphere[0].center.y;
+    Sphere[0].center.x = Sphere[0].center.x + move.x; 
+    // Sphere[0].center.y = move.y + Sphere[0].center.y;
     Sphere[0].center.z = move.z + Sphere[0].center.z;
     Cone[4].apex = vec3(Sphere[0].center.x, 4.7, Sphere[0].center.z);
     Cone[5].apex = vec3(Sphere[0].center.x, 5.1, Sphere[0].center.z);
