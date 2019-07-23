@@ -2,6 +2,7 @@ const float KEY_LEFT  = 37.5/256.0;
 const float KEY_UP    = 38.5/256.0;
 const float KEY_RIGHT = 39.5/256.0;
 const float KEY_DOWN  = 40.5/256.0;
+const float KEY_W     = 82.5/256.0;
 
 const float MOVE_SPEED = 4.0;
 //const float ROT_SPEED = 4.0;
@@ -39,9 +40,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
             col.x += moveLength;
             col.w = 3.0;
         }
-        
-        //col.xz = min(col.xz, 9.3);
-        //col.xz = max(col.xz, -9.3);
+        if (isKeyPressed(KEY_W)) {
+            col = vec4(0.0);
+        }
     }
     
     fragColor = col;
