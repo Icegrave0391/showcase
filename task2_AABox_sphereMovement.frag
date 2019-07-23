@@ -30,7 +30,7 @@
 //============================================================================
 const int NUM_LIGHTS = 2;
 const int NUM_MATERIALS = 5;
-const int NUM_PLANES = 0;
+const int NUM_PLANES = 2;
 const int NUM_SPHERES = 1;
 const int NUM_AABOXES = 29;
 const int NUM_CONES = 6;
@@ -127,7 +127,7 @@ struct Material_t {
 //============================================================================
 // Global scene data.
 //============================================================================
-Plane_t Plane[1];
+Plane_t Plane[NUM_PLANES];
 Sphere_t Sphere[NUM_SPHERES];
 AABox_t AABox[NUM_AABOXES];
 Cone_t Cone[NUM_CONES];
@@ -140,33 +140,6 @@ Material_t Material[NUM_MATERIALS];
 void InitMap()
 {
     // AABox.
-    // AABox[0].center = vec3(0.0, 3.0, 5.0);
-    // AABox[0].size = vec3(1.0, 0.2, 10.0);
-    // AABox[0].materialID = 0;
-
-    // AABox[1].center = vec3(5.5, 3.0, 9.5);
-    // AABox[1].size = vec3(10.0, 0.2, 1.0);
-    // AABox[1].materialID = 0;
-
-    // AABox[2].center = vec3(10.0, 3.0, 15.0);
-    // AABox[2].size = vec3(1.0, 0.2, 10.0);
-    // AABox[2].materialID = 0;
-
-    // AABox[3].center = vec3(4.5, 3.0, 19.5);
-    // AABox[3].size = vec3(10.0, 0.2, 1.0);
-    // AABox[3].materialID = 0;
-
-    // AABox[4].center = vec3(0.0, 3.0, 25.0);
-    // AABox[4].size = vec3(1.0, 0.2, 10.0);
-    // AABox[4].materialID = 0;
-
-    // AABox[5].center = vec3(5.5, 3.0, 29.5);
-    // AABox[5].size = vec3(10.0, 0.2, 1.0);
-    // AABox[5].materialID = 0;
-
-    // AABox[6].center = vec3(15.5, 3.0, 29.5);
-    // AABox[6].size = vec3(10.0, 0.2, 1.0);
-    // AABox[6].materialID = 0;
     AABox[0].center = vec3(13.5, 3.0, 1.5);
     AABox[0].size = vec3(27.0, 0.2, 3.0);
     AABox[0].materialID = 0;
@@ -333,6 +306,13 @@ void InitScene()
     Plane[0].type = 0;
     Plane[0].materialID = 3;
 
+    //Vertical plane
+    Plane[1].A = 0.0;
+    Plane[1].B = 0.0;
+    Plane[1].C = 1.0;
+    Plane[1].D = -45.0;
+    Plane[1].type = 0;
+    Plane[1].materialID = 3;
     // Sphere.
     Sphere[0].center = vec3( 25.5, 3.6, 1.5 );
     Sphere[0].radius = 0.5;
@@ -944,7 +924,8 @@ vec3 CastRay( in Ray_t ray,
     // One of the output results.
     hasHit = hasHitSomething;
     if ( !hasHitSomething ) {
-        return texture(iChannel2, ray.d).xyz;
+        // return texture(iChannel2, ray.d).xyz;
+        return vec3(0, 0, 0);
     }
     vec3 I_local = vec3( 0.0 );  // Result color will be accumulated here.
 
