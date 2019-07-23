@@ -33,7 +33,7 @@ const int NUM_MATERIALS = 3;
 const int NUM_PLANES = 1;
 const int NUM_SPHERES = 1;
 const int NUM_AABOXES = 7;
-const int NUM_CONES = 2;
+const int NUM_CONES = 3;
 
 const vec3 BACKGROUND_COLOR = vec3( 0.1, 0.2, 0.6 );
 
@@ -166,7 +166,7 @@ void InitMap()
     AABox[5].size = vec3(10.0, 0.2, 1.0);
     AABox[5].materialID = 0;
 
-    AABox[6].center = vec3(10.5, 3.0, 29.5);
+    AABox[6].center = vec3(15.5, 3.0, 29.5);
     AABox[6].size = vec3(10.0, 0.2, 1.0);
     AABox[6].materialID = 0;
 
@@ -179,9 +179,15 @@ void InitMap()
 
     Cone[1].cosa = 0.9;
     Cone[1].height = 1.0;
-    Cone[1].apex = vec3(15.0, 6.1, 34);
+    Cone[1].apex = vec3(20.0, 6.1, 29.5);
     Cone[1].axis = vec3(0.0, -1.0, 0.0);
     Cone[1].materialID = 2;
+
+    Cone[2].cosa = 0.95;
+    Cone[2].height = 0.3;
+    Cone[2].apex = vec3(Sphere[0].center.x, 4.1, Sphere[0].center.z);
+    Cone[2].axis = vec3(0.0, 1.0, 0.0);
+    Cone[2].materialID = 2;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -628,6 +634,7 @@ void drop(Sphere_t sphere, AABox_t box, int side){
             sphere.center.x += sin(theta_t * delta_time);
         }
     }
+    float vert_time = iTime;
     float g = 9.8;
     //直线
     // while(sphere.center.y >= 0.0){
@@ -899,25 +906,40 @@ vec3 CastRay( in Ray_t ray,
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
     InitScene();
-
+    
+    // Sphere move 
+    vec3 move = changeCenter(Sphere[0].center);
+    Sphere[0].center.x = move.x; 
+    Sphere[0].center.y = move.y + Sphere[0].center.y;
+    Sphere[0].center.z = move.z + Sphere[0].center.z;
+    Cone[2].apex = vec3(Sphere[0].center.x, 4.5, Sphere[0].center.z);
+    
+    // dropDetection(Sphere[i]);
+    
     // Scale pixel 2D position such that its y coordinate is in [-1.0, 1.0].
     vec2 pixel_pos = (2.0 * fragCoord.xy - iResolution.xy) / iResolution.y;
-
-    // Position the camera.
-    // vec3 cam_pos = vec3( 10.0 * cos(.5 * iTime), 5.0, 10.0 * sin(.5 * iTime) );
-    vec3 cam_pos = vec3(10, 10, 0);
-    vec3 cam_lookat = vec3( 2.5, 0.0, -1.0 );
-    vec3 cam_up_vec = vec3( 0.0, 1.0, 0.0 );
+    
+    
+    // Camera Setup
+    vec2 mouse = iMouse.xy / iResolution.xy * .5;
+    float angleX = iMouse.z > 0.0 ? 6.28 * mouse.x : 3.14 + 0.0;
+    float angleY = iMouse.z > 0.0 ? (mouse.y * 6.28) - 0.4 : 0.3;
+    
+    vec3 cam_angle = (vec3(sin(angleX)*cos(angleY), sin(angleY), cos(angleX)*cos(angleY))) * 8.0;
+	vec3 cam_lookat = Sphere[0].center;
+    vec3 cam_pos = cam_lookat + cam_angle;
+    
+    vec3 cam_fwd  = normalize(-cam_angle);
+    vec3 cam_left = normalize(cross(cam_fwd, vec3(0.0, sign(cos(angleY)), 0.0)));
+    vec3 cam_up_vec = normalize(cross(cam_left, cam_fwd));
 
     // Set up camera coordinate frame in world space.
-    vec3 cam_z_axis = normalize( cam_pos - cam_lookat );
+    vec3 cam_z_axis = normalize( cam_angle );
     vec3 cam_x_axis = normalize( cross(cam_up_vec, cam_z_axis) );
     vec3 cam_y_axis = normalize( cross(cam_z_axis, cam_x_axis));
-
-    // Set up view transformation
     
-    //
-
+    // Initialize scene
+	
 
     // Create primary ray.
     float pixel_pos_z = -1.0 / tan(FOVY / 2.0);
@@ -925,6 +947,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     pRay.o = cam_pos;
     pRay.d = normalize( pixel_pos.x * cam_x_axis  +  pixel_pos.y * cam_y_axis  +  pixel_pos_z * cam_z_axis );
 
+<<<<<<< HEAD
     //moving 
     vec3 move = changeCenter(Sphere[0].center);
     Sphere[0].center.x = move.x; 
@@ -934,6 +957,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     CURR_TIME = iTime + 1.0;
     dropDetection(Sphere[0]);
 
+=======
+>>>>>>> 3812cead47ab6f3bed6f01fb09213bb3c8be3ec1
     // Start Ray Tracing.
     // Use iterations to emulate the recursion.
 
@@ -956,6 +981,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
         nextRay = Ray_t( hitPos, normalize( reflect(nextRay.d, hitNormal) ) );
     }
-    PREV_TIME = iTime;
+
     fragColor = vec4( I_result, 1.0 );
 }

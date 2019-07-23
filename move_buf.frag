@@ -23,20 +23,20 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
         float moveLength = MOVE_SPEED * iTimeDelta * 0.25;
         
         if (isKeyPressed(KEY_UP)) {
-            col.x += moveLength;
+            col.z += moveLength;
             col.w = 1.0;
         }
         if (isKeyPressed(KEY_DOWN)) {
-            col.x -= moveLength;
+            col.z -= moveLength;
             col.w = 2.0;
         }
         
         if (isKeyPressed(KEY_RIGHT)) {
-            col.z += moveLength;
+            col.x -= moveLength;
             col.w = 4.0;
         }
         if (isKeyPressed(KEY_LEFT)) {
-            col.z -= moveLength;
+            col.x += moveLength;
             col.w = 3.0;
         }
         
