@@ -29,16 +29,14 @@
 // Constants.
 //============================================================================
 const int NUM_LIGHTS = 2;
-const int NUM_MATERIALS = 3;
-const int NUM_PLANES = 1;
+const int NUM_MATERIALS = 5;
+const int NUM_PLANES = 0;
 const int NUM_SPHERES = 1;
-const int NUM_AABOXES = 29;
-const int NUM_CONES = 3;
-
-const vec3 BACKGROUND_COLOR = vec3( 0.1, 0.2, 0.6 );
+const int NUM_AABOXES = 7;
+const int NUM_CONES = 6;
 
  // Vertical field-of-view angle of camera. In radians.
-const float FOVY = 50.0 * 3.1415926535 / 180.0; 
+const float FOVY = 55.0 * 3.1415926535 / 180.0; 
 
 // Use this for avoiding the "epsilon problem" or the shadow acne problem.
 const float DEFAULT_TMIN = 10.0e-4;
@@ -57,6 +55,7 @@ int MOV_DIRECTION = 0; // 1:up, 2:down, 3:left, 4:right
 //set drop delta time
 float PREV_TIME = 0.0;
 float CURR_TIME = 0.0;
+
 //============================================================================
 // Define new struct types.
 //============================================================================
@@ -128,7 +127,7 @@ struct Material_t {
 //============================================================================
 // Global scene data.
 //============================================================================
-Plane_t Plane[NUM_PLANES];
+Plane_t Plane[1];
 Sphere_t Sphere[NUM_SPHERES];
 AABox_t AABox[NUM_AABOXES];
 Cone_t Cone[NUM_CONES];
@@ -284,23 +283,41 @@ void InitMap()
     AABox[28].size = vec3(3.0, 0.2, 3.0);
     AABox[28].materialID = 0;
     // Cone.
-    Cone[0].cosa = 0.9;
-    Cone[0].height = 1.0;
+    Cone[0].cosa = 0.7;
+    Cone[0].height = 0.5;
     Cone[0].apex = vec3(0.0, 6.1, 0.5);
     Cone[0].axis = vec3(0.0, -1.0, 0.0);
     Cone[0].materialID = 2;
 
-    Cone[1].cosa = 0.9;
-    Cone[1].height = 1.0;
-    Cone[1].apex = vec3(20.0, 6.1, 29.5);
-    Cone[1].axis = vec3(0.0, -1.0, 0.0);
+    Cone[1].cosa = 0.7;
+    Cone[1].height = 0.5;
+    Cone[1].apex = vec3(0.0, 5.1, 0.5);
+    Cone[1].axis = vec3(0.0, 1.0, 0.0);
     Cone[1].materialID = 2;
 
-    Cone[2].cosa = 0.95;
-    Cone[2].height = 0.3;
-    Cone[2].apex = vec3(Sphere[0].center.x, 4.1, Sphere[0].center.z);
-    Cone[2].axis = vec3(0.0, 1.0, 0.0);
+    Cone[2].cosa = 0.7;
+    Cone[2].height = 0.5;
+    Cone[2].apex = vec3(20.0, 6.1 + 0.1 * cos(iTime), 29.5);
+    Cone[2].axis = vec3(0.0, -1.0, 0.0);
     Cone[2].materialID = 2;
+
+    Cone[3].cosa = 0.7;
+    Cone[3].height = 0.5;
+    Cone[3].apex = vec3(20.0, 5.1 + 0.1 * cos(iTime), 29.5);
+    Cone[3].axis = vec3(0.0, 1.0, 0.0);
+    Cone[3].materialID = 2;
+
+    Cone[4].cosa = 0.7;
+    Cone[4].height = 0.2;
+    Cone[4].apex = vec3(Sphere[0].center.x, 4.7, Sphere[0].center.z);
+    Cone[4].axis = vec3(0.0, 1.0, 0.0);
+    Cone[4].materialID = 2;
+
+    Cone[5].cosa = 0.7;
+    Cone[5].height = 0.2;
+    Cone[5].apex = vec3(Sphere[0].center.x, 5.1, Sphere[0].center.z);
+    Cone[5].axis = vec3(0.0, -1.0, 0.0);
+    Cone[5].materialID = 2;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -309,18 +326,19 @@ void InitMap()
 void InitScene()
 {
     // Horizontal plane.
-    Plane[0].A = 0.0;
-    Plane[0].B = 1.0;
-    Plane[0].C = 0.0;
-    Plane[0].D = 0.0;
-    Plane[0].type = 1;
-    Plane[0].materialID = 0;
+    //Plane[0].A = 0.0;
+    //Plane[0].B = 1.0;
+    //Plane[0].C = 0.0;
+    //Plane[0].D = 0.0;
+    //Plane[0].type = 1;
+    //Plane[0].materialID = 3;
 
     // Sphere.
     Sphere[0].center = vec3( 0.0, 3.6, 0.5 );
     Sphere[0].radius = 0.5;
     Sphere[0].materialID = 1;
     Sphere[0].BoxID = 0;
+    
     InitMap();
 
     // Silver material.
@@ -343,6 +361,18 @@ void InitScene()
     Material[2].k_r = vec3( 1.0, 1.0, 1.0 );
     Material[2].k_rg = 0.5 * Material[2].k_r;
     Material[2].n = 128.0;
+    
+    Material[3].k_d = vec3(0.714, 0.4284, 0.18144);
+    Material[3].k_a = vec3(0.2125, 0.1275, 0.054);
+    Material[3].k_r = vec3(0.393548, 0.271906, 0.166721);
+    Material[3].k_rg = 0.5 * Material[0].k_r;   
+    Material[3].n = 25.6;
+    
+    Material[4].k_d = vec3(0.61424, 0.04136, 0.04136);
+    Material[4].k_a = vec3(0.1745, 0.01175, 0.01175);
+    Material[4].k_r = vec3(0.727811, 0.626959, 0.626959);
+    Material[4].k_rg = 0.5 * Material[0].k_r;   
+    Material[4].n = 76.8;
 
     // Light 0.
     Light[0].position = vec3( 4.0, 8.0, -3.0 );
@@ -377,6 +407,9 @@ bool IntersectPlane( in Plane_t pln, in Ray_t ray, in float tmin, in float tmax,
     // We have a hit -- output results.
     t = t0;
     hitPos = ray.o + t0 * ray.d;
+    if (hitPos.x < -50.0 || hitPos.x > 50.0 ||
+        hitPos.z < -50.0 || hitPos.z > 50.0)
+        return false;
     hitNormal = normalize( N );
     return true;
 }
@@ -395,6 +428,12 @@ bool IntersectPlane( in Plane_t pln, in Ray_t ray, in float tmin, in float tmax 
     float NRo = dot( N, ray.o );
     float t0 = (-pln.D - NRo) / NRd;
     if ( t0 < tmin || t0 > tmax ) return false;
+
+    float t = t0;
+    vec3 hitPos = ray.o + t0 * ray.d;
+    if (hitPos.x < -50.0 || hitPos.x > 50.0 ||
+        hitPos.z < -50.0 || hitPos.z > 50.0)
+        return false;
     return true;
 }
 
@@ -729,7 +768,7 @@ bool onBox(Sphere_t sphere, AABox_t box){
 }
 
 void drop(Sphere_t sphere, AABox_t box, int side){
-    // AABox[0].materialID = 1;
+    AABox[0].materialID = 1;
     float theta_t = 30.0;
     float delta_time = CURR_TIME - PREV_TIME;
     if(sphere.center.y >= box.center.y){           //弧线
@@ -762,12 +801,10 @@ void dropDetection(Sphere_t sphere)
     int should_drop = 0;
     if(sphere.BoxID == 0){
         if(onBox(sphere, AABox[0])){
-            AABox[0].materialID = 1;
             sphere.BoxID = 0;
             should_drop = 0;
         }
         else if(onBox(sphere, AABox[1])){
-            AABox[1].materialID = 1;
             sphere.BoxID = 1;
             should_drop = 0;
         }
@@ -777,24 +814,20 @@ void dropDetection(Sphere_t sphere)
         }
     }
     else{
-        int ID = sphere.BoxID;
-        if(onBox(sphere, AABox[ID])){
-            AABox[ID].materialID = 1;
+        if(onBox(sphere, AABox[sphere.BoxID])){
             sphere.BoxID = sphere.BoxID;
             should_drop = 0;
         }
-        else if(onBox(sphere, AABox[ID + 1])){
-            sphere.BoxID = ID + 1;
-            AABox[ID + 1].materialID = 1;
+        else if(onBox(sphere, AABox[sphere.BoxID + 1])){
+            sphere.BoxID += 1;
             should_drop = 0;
         }
-        else if(onBox(sphere, AABox[ID - 1])){
-            sphere.BoxID = ID - 1;
-            AABox[ID - 1].materialID = 1;
+        else if(onBox(sphere, AABox[sphere.BoxID - 1])){
+            sphere.BoxID -= 1;
             should_drop = 0;
         }
         else{
-            sphere.BoxID = ID;
+            sphere.BoxID = sphere.BoxID;
             should_drop = 1;
         }
     }
@@ -863,6 +896,26 @@ vec3 CastRay( in Ray_t ray,
     int aabox_num = NUM_AABOXES;
     //calculate sphere intersection
     for(int i = 0; i < sphere_num; i++){
+        
+        // if(i == 0) {
+        // 	vec3 move = changeCenter(Sphere[i].center);
+            
+        //     Sphere[i].center.x = move.x;
+        //     Sphere[i].center.y = move.y + Sphere[i].center.y;
+        //     Sphere[i].center.z = move.z + Sphere[i].center.z;
+            
+        //     // dropDetection(Sphere[i]);
+        //     temp_hasHit = IntersectSphere( Sphere[i], ray, DEFAULT_TMIN, DEFAULT_TMAX,
+        //               temp_t, temp_hitPos, temp_hitNormal );
+
+		//     if(temp_hasHit && temp_t < nearest_t){
+		// 		hasHitSomething = true;
+		// 		nearest_t = temp_t;
+		// 		nearest_hitPos = temp_hitPos;
+		// 		nearest_hitNormal = temp_hitNormal;
+		// 		nearest_hitMatID = Sphere[i].materialID;
+		// 	}		   
+        // }  
 		temp_hasHit = IntersectSphere( Sphere[i], ray, DEFAULT_TMIN, DEFAULT_TMAX,
                   temp_t, temp_hitPos, temp_hitNormal );
 
@@ -916,8 +969,9 @@ vec3 CastRay( in Ray_t ray,
     }
     // One of the output results.
     hasHit = hasHitSomething;
-    if ( !hasHitSomething ) return BACKGROUND_COLOR;
-
+    if ( !hasHitSomething ) {
+        return texture(iChannel2, ray.d).xyz;
+    }
     vec3 I_local = vec3( 0.0 );  // Result color will be accumulated here.
 
     /////////////////////////////////////////////////////////////////////////////
@@ -1004,6 +1058,7 @@ vec3 CastRay( in Ray_t ray,
 /////////////////////////////////////////////////////////////////////////////
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
+    // Initialize scene
     InitScene();
     
     // Sphere move 
@@ -1011,10 +1066,10 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     Sphere[0].center.x = move.x; 
     Sphere[0].center.y = move.y + Sphere[0].center.y;
     Sphere[0].center.z = move.z + Sphere[0].center.z;
-    Cone[2].apex = vec3(Sphere[0].center.x, 4.5, Sphere[0].center.z);
-    //drop detection
-    CURR_TIME = iTime + 1.0;
-    dropDetection(Sphere[0]); 
+    Cone[4].apex = vec3(Sphere[0].center.x, 4.7, Sphere[0].center.z);
+    Cone[5].apex = vec3(Sphere[0].center.x, 5.1, Sphere[0].center.z);
+    
+    // dropDetection(Sphere[i]);
     
     // Scale pixel 2D position such that its y coordinate is in [-1.0, 1.0].
     vec2 pixel_pos = (2.0 * fragCoord.xy - iResolution.xy) / iResolution.y;
@@ -1037,8 +1092,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     vec3 cam_z_axis = normalize( cam_angle );
     vec3 cam_x_axis = normalize( cross(cam_up_vec, cam_z_axis) );
     vec3 cam_y_axis = normalize( cross(cam_z_axis, cam_x_axis));
-    
-    // Initialize scene
 	
 
     // Create primary ray.
@@ -1046,6 +1099,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     Ray_t pRay;
     pRay.o = cam_pos;
     pRay.d = normalize( pixel_pos.x * cam_x_axis  +  pixel_pos.y * cam_y_axis  +  pixel_pos_z * cam_z_axis );
+
 
     // Start Ray Tracing.
     // Use iterations to emulate the recursion.
