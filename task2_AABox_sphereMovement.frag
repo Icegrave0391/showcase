@@ -947,7 +947,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     pRay.o = cam_pos;
     pRay.d = normalize( pixel_pos.x * cam_x_axis  +  pixel_pos.y * cam_y_axis  +  pixel_pos_z * cam_z_axis );
 
-<<<<<<< HEAD
     //moving 
     vec3 move = changeCenter(Sphere[0].center);
     Sphere[0].center.x = move.x; 
@@ -957,8 +956,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     CURR_TIME = iTime + 1.0;
     dropDetection(Sphere[0]);
 
-=======
->>>>>>> 3812cead47ab6f3bed6f01fb09213bb3c8be3ec1
     // Start Ray Tracing.
     // Use iterations to emulate the recursion.
 
