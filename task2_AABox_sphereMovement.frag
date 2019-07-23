@@ -484,61 +484,6 @@ vec3 PhongLighting( in vec3 L, in vec3 N, in vec3 V, in bool inShadow,
                light.I_source * (dcolor * N_dot_L + r * R_dot_V_pow_n);
     }
 }
-
-//side = 1 : front, side = 2: back, side = 3: left, side = 4: right
-void drop(Sphere_t sphere, AABox_t box, int side, float start_time){
-    float theta_t = 30.0;
-    while(sphere.center.y >= box.center.y){           //弧线
-        sphere.center.y -= sphere.radius * (1.0 - cos(theta_t * (iTime - start_time)));
-        if(side == 1){
-            sphere.center.z += sin(theta_t * (iTime - start_time));
-        }
-        if(side == 2){
-            sphere.center.z -= sin(theta_t * (iTime - start_time));
-        }
-        if(side == 3){
-            sphere.center.x -= sin(theta_t * (iTime - start_time));
-        }
-        if(side == 4){
-            sphere.center.x += sin(theta_t * (iTime - start_time));
-        }
-    }
-    float vert_time = iTime;
-    float g = 9.8;
-    //直线
-    while(sphere.center.y >= 0.0){
-        sphere.center.y = box.center.y - 0.5 * g * (iTime - vert_time) * (iTime - vert_time);
-    }
-}
-
-void dropDetection(Sphere_t sphere)
-{   
-    vec3 cur_center = sphere.center;
-    float radius = sphere.radius;
-    for(int i = 0 ; i < NUM_AABOXES ; i++){
-        float front_side = AABox[i].center.z + 0.5 * AABox[i].size.z;
-        float right_side = AABox[i].center.x + 0.5 * AABox[i].size.x;
-        float back_side = AABox[i].center.z - 0.5 * AABox[i].size.z;
-        float left_side = AABox[i].center.x - 0.5 * AABox[i].size.x;
-        if(cur_center.z >= front_side ){
-            drop(sphere, AABox[i], 1, iTime);
-            break;
-        }
-        if(cur_center.z <= back_side ){
-            drop(sphere, AABox[i], 2, iTime);
-            break;
-        }
-        if(cur_center.x <= left_side ){
-            drop(sphere, AABox[i], 3, iTime);
-            break;
-        }
-        if(cur_center.x >= right_side){
-            drop(sphere, AABox[i], 4, iTime);
-            break;
-        }
-    }
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // Casts a ray into the scene and returns color computed at the nearest
 // intersection point. The color is the sum of light from all light sources,
@@ -590,10 +535,9 @@ vec3 CastRay( in Ray_t ray,
             changeDirection();
             
             Sphere[i].center.x = move.x;
-            Sphere[i].center.y = move.y + Sphere[i].center.y;
-            Sphere[i].center.z = move.z + Sphere[i].center.z;
+            Sphere[i].center.y = move.y + 3.6;
+            Sphere[i].center.z = move.z + 0.5;
             
-            dropDetection(Sphere[i]);
             temp_hasHit = IntersectSphere( Sphere[i], ray, DEFAULT_TMIN, DEFAULT_TMAX,
                       temp_t, temp_hitPos, temp_hitNormal );
 
@@ -719,6 +663,8 @@ vec3 CastRay( in Ray_t ray,
     return I_local;
 }
 
+
+
 /////////////////////////////////////////////////////////////////////////////
 // Execution of fragment shader starts here.
 // 1. Initializes the scene.
@@ -733,8 +679,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     vec2 pixel_pos = (2.0 * fragCoord.xy - iResolution.xy) / iResolution.y;
 
     // Position the camera.
-    // vec3 cam_pos = vec3( 10.0 * cos(.5 * iTime), 5.0, 10.0 * sin(.5 * iTime) );
-    vec3 cam_pos = vec3(10, 10, 0);
+    vec3 cam_pos = vec3( 10.0 * cos(.5 * iTime), 5.0, 10.0 * sin(.5 * iTime) );
     vec3 cam_lookat = vec3( 2.5, 0.0, -1.0 );
     vec3 cam_up_vec = vec3( 0.0, 1.0, 0.0 );
 
@@ -744,8 +689,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     vec3 cam_y_axis = normalize( cross(cam_z_axis, cam_x_axis));
 
     // Set up view transformation
-    
-    //
     
 
     // Create primary ray.
