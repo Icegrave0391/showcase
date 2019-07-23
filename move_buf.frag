@@ -146,6 +146,11 @@ bool onBox(vec2 position2D){
         float back_side = AABox[i].center.z - AABox[i].size.z * 0.5;
         float curr_x = position2D.x;
         float curr_z = position2D.y;
+
+        vec2 final_point = vec2(19.5, 37.5);
+        if(curr_x >= final_point.x - 0.5 && curr_x <= final_point.x + 0.5 && curr_z >= final_point.z - 0.5 && curr_z <= final_point.z + 0.5){
+            return false;
+        }
         if((curr_x >= left_side && curr_x <= right_side) && (curr_z >= back_side && curr_z <= front_side)){
             flag = 1;
             break;
