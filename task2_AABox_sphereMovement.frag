@@ -326,12 +326,12 @@ void InitMap()
 void InitScene()
 {
     // Horizontal plane.
-    //Plane[0].A = 0.0;
-    //Plane[0].B = 1.0;
-    //Plane[0].C = 0.0;
-    //Plane[0].D = 0.0;
-    //Plane[0].type = 1;
-    //Plane[0].materialID = 3;
+    Plane[0].A = 0.0;
+    Plane[0].B = 1.0;
+    Plane[0].C = 0.0;
+    Plane[0].D = 0.0;
+    Plane[0].type = 0;
+    Plane[0].materialID = 3;
 
     // Sphere.
     Sphere[0].center = vec3( 25.5, 3.6, 1.5 );
@@ -853,11 +853,11 @@ vec3 PhongLighting( in vec3 L, in vec3 N, in vec3 V, in bool inShadow,
 // of the material of the intersected object.
 /////////////////////////////////////////////////////////////////////////////
 vec3 CastRay( in Ray_t ray, 
-              out bool hasHit, out vec3 hitPos, out vec3 hitNormal, out vec3 k_rg ) 
+              out bool hasHit, out bool isRefract, out vec3 hitPos, out vec3 hitNormal, out vec3 k_rg ) 
 {
     // Find whether and where the ray hits some object. 
     // Take the nearest hit point.
-
+    isRefract = false;
     bool hasHitSomething = false;
     float nearest_t = DEFAULT_TMAX;   // The ray parameter t at the nearest hit point.
     vec3 nearest_hitPos;              // 3D position of the nearest hit point.
@@ -883,6 +883,7 @@ vec3 CastRay( in Ray_t ray,
     int plane_num = NUM_PLANES;
     int sphere_num = NUM_SPHERES;
     int aabox_num = NUM_AABOXES;
+    bool is_box = false;
     //calculate sphere intersection
     for(int i = 0; i < sphere_num; i++){
 		temp_hasHit = IntersectSphere( Sphere[i], ray, DEFAULT_TMIN, DEFAULT_TMAX,
@@ -902,6 +903,7 @@ vec3 CastRay( in Ray_t ray,
         temp_hasHit = IntersectAABox(AABox[i], ray, DEFAULT_TMIN, DEFAULT_TMAX, temp_t, temp_hitPos, temp_hitNormal);
         if(temp_hasHit) hasHitSomething = true;
         if(temp_hasHit && temp_t < nearest_t){
+            is_box = true;
             nearest_t = temp_t;
             nearest_hitPos = temp_hitPos;
             nearest_hitNormal = temp_hitNormal;
@@ -915,6 +917,7 @@ vec3 CastRay( in Ray_t ray,
         if(temp_hasHit) hasHitSomething = true;
         if(temp_hasHit && temp_t < nearest_t){
             nearest_t = temp_t;
+            is_box = false;
             nearest_hitPos = temp_hitPos;
             nearest_hitNormal = temp_hitNormal;
             nearest_hitMatID = Cone[i].materialID;
@@ -923,12 +926,14 @@ vec3 CastRay( in Ray_t ray,
 
     //calculate plane intersection
     bool is_plane = false;
+    
     Plane_t hit_plane;
     for(int i = 0; i < plane_num; i++){
         temp_hasHit = IntersectPlane(Plane[i], ray, DEFAULT_TMIN, DEFAULT_TMAX, temp_t, temp_hitPos, temp_hitNormal);
         if(temp_hasHit) hasHitSomething = true;
         if(temp_hasHit && temp_t < nearest_t){
             nearest_t = temp_t;
+            is_box = false;
             nearest_hitPos = temp_hitPos;
             nearest_hitNormal = temp_hitNormal;
             is_plane = true;
@@ -1000,10 +1005,12 @@ vec3 CastRay( in Ray_t ray,
 
         //***phong lighting
         vec3 phong;
-        if(!is_plane || (is_plane && hit_plane.type == 0)){
+        if(!is_plane || (is_plane && hit_plane.type == 0)) {
             phong = PhongLighting(shadowRay.d, nearest_hitNormal, -ray.d, isShadow, Material[nearest_hitMatID], Light[i]);
+            if (is_box)
+                isRefract = true;
         }
-        else{
+        else {
             vec2 tex_coord = nearest_hitPos.xz * 0.25;
             phong = PhongLighting(shadowRay.d, nearest_hitNormal, -ray.d, isShadow, tex_coord, Light[i]); 
         }
@@ -1023,8 +1030,9 @@ void Success(out vec4 fragColor, in vec2 fragCoord)
 {
     float t = iTime;
     vec2 r = iResolution.xy;
-    vec3 c;r
-	float l,z=t;
+    vec3 c;
+	float l;
+    float z=t;
 	for(int i=0;i<3;i++) {
 		vec2 uv,p=fragCoord.xy/r;
 		uv=p;
@@ -1095,6 +1103,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
         // Start Ray Tracing.
         // Use iterations to emulate the recursion.
 
+        bool isRefract;
         vec3 I_result = vec3( 0.0 );
         vec3 compounded_k_rg = vec3( 1.0 );
         Ray_t nextRay = pRay;
@@ -1104,7 +1113,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
             bool hasHit;
             vec3 hitPos, hitNormal, k_rg;
 
-            vec3 I_local = CastRay( nextRay, hasHit, hitPos, hitNormal, k_rg );
+            vec3 I_local = CastRay( nextRay, hasHit, isRefract, hitPos, hitNormal, k_rg );
 
             I_result += compounded_k_rg * I_local;
 
@@ -1112,7 +1121,10 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
             compounded_k_rg *= k_rg;
 
-            nextRay = Ray_t( hitPos, normalize( reflect(nextRay.d, hitNormal) ) );
+            //if (!isRefract)
+                nextRay = Ray_t( hitPos, normalize( reflect(nextRay.d, hitNormal) ) );
+            //else
+                //nextRay = Ray_t( hitPos, normalize( refract(nextRay.d, hitNormal, 0.7) ) );
         }
 
         fragColor = vec4( I_result, 1.0 );
