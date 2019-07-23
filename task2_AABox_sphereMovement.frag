@@ -55,6 +55,7 @@ const float INTERVAL = 0.5;
 
 //direction
 int MOV_DIRECTION = 0; // 1:up, 2:down, 3:left, 4:right
+float PREV_TIME, CURR_TIME;
 
 //============================================================================
 // Define new struct types.
@@ -225,7 +226,7 @@ bool IntersectPlane( in Plane_t pln, in Ray_t ray, in float tmin, in float tmax 
 
 // Movement of the sphere
 vec3 changeCenter(vec3 centerOld) {
-	vec4 sphereInfo = texture(iChannel0, vec2(0.0));
+	vec4 sphereInfo = texture(iChannel1, vec2(0.0));
     vec3 change = sphereInfo.xyz;
     
     return change;
@@ -233,7 +234,7 @@ vec3 changeCenter(vec3 centerOld) {
 
 // Direction
 void changeDirection() {
-	vec4 directionInfo = texture(iChannel0, vec2(0.0));
+	vec4 directionInfo = texture(iChannel1, vec2(0.0));
     float dir = directionInfo.w;
     
     MOV_DIRECTION = int(dir);
@@ -486,29 +487,30 @@ vec3 PhongLighting( in vec3 L, in vec3 N, in vec3 V, in bool inShadow,
 }
 
 //side = 1 : front, side = 2: back, side = 3: left, side = 4: right
-void drop(Sphere_t sphere, AABox_t box, int side, float start_time){
+void drop(Sphere_t sphere, AABox_t box, int side){
     float theta_t = 30.0;
-    while(sphere.center.y >= box.center.y){           //弧线
-        sphere.center.y -= sphere.radius * (1.0 - cos(theta_t * (iTime - start_time)));
+    float delta_time = CURR_TIME - PREV_TIME;
+    if(sphere.center.y >= box.center.y){           //弧线
+        sphere.center.y -= sphere.radius * (1.0 - cos(theta_t * delta_time));
         if(side == 1){
-            sphere.center.z += sin(theta_t * (iTime - start_time));
+            sphere.center.z += sin(theta_t * delta_time);
         }
         if(side == 2){
-            sphere.center.z -= sin(theta_t * (iTime - start_time));
+            sphere.center.z -= sin(theta_t * delta_time);
         }
         if(side == 3){
-            sphere.center.x -= sin(theta_t * (iTime - start_time));
+            sphere.center.x -= sin(theta_t * delta_time);
         }
         if(side == 4){
-            sphere.center.x += sin(theta_t * (iTime - start_time));
+            sphere.center.x += sin(theta_t * delta_time);
         }
     }
     float vert_time = iTime;
     float g = 9.8;
     //直线
-    while(sphere.center.y >= 0.0){
-        sphere.center.y = box.center.y - 0.5 * g * (iTime - vert_time) * (iTime - vert_time);
-    }
+    // while(sphere.center.y >= 0.0){
+    //     sphere.center.y = box.center.y - 0.5 * g * (iTime - vert_time) * (iTime - vert_time);
+    // }
 }
 
 void dropDetection(Sphere_t sphere)
@@ -520,7 +522,7 @@ void dropDetection(Sphere_t sphere)
         float right_side = AABox[i].center.x + 0.5 * AABox[i].size.x;
         float back_side = AABox[i].center.z - 0.5 * AABox[i].size.z;
         float left_side = AABox[i].center.x - 0.5 * AABox[i].size.x;
-        if(cur_center.z >= front_side ){
+        if(cur_center.z >= front_side){
             drop(sphere, AABox[i], 1, iTime);
             break;
         }
@@ -585,38 +587,36 @@ vec3 CastRay( in Ray_t ray,
     //calculate sphere intersection
     for(int i = 0; i < sphere_num; i++){
         
-        if(i == 0) {
-        	vec3 move = changeCenter(Sphere[i].center);
+        // if(i == 0) {
+        // 	vec3 move = changeCenter(Sphere[i].center);
             
-            Sphere[i].center.x = move.x;
-            Sphere[i].center.y = move.y + Sphere[i].center.y;
-            Sphere[i].center.z = move.z + Sphere[i].center.z;
+        //     Sphere[i].center.x = move.x;
+        //     Sphere[i].center.y = move.y + Sphere[i].center.y;
+        //     Sphere[i].center.z = move.z + Sphere[i].center.z;
             
-            dropDetection(Sphere[i]);
-            temp_hasHit = IntersectSphere( Sphere[i], ray, DEFAULT_TMIN, DEFAULT_TMAX,
-                      temp_t, temp_hitPos, temp_hitNormal );
+        //     // dropDetection(Sphere[i]);
+        //     temp_hasHit = IntersectSphere( Sphere[i], ray, DEFAULT_TMIN, DEFAULT_TMAX,
+        //               temp_t, temp_hitPos, temp_hitNormal );
 
-		    if(temp_hasHit && temp_t < nearest_t){
-				hasHitSomething = true;
-				nearest_t = temp_t;
-				nearest_hitPos = temp_hitPos;
-				nearest_hitNormal = temp_hitNormal;
-				nearest_hitMatID = Sphere[i].materialID;
-			}		
+		//     if(temp_hasHit && temp_t < nearest_t){
+		// 		hasHitSomething = true;
+		// 		nearest_t = temp_t;
+		// 		nearest_hitPos = temp_hitPos;
+		// 		nearest_hitNormal = temp_hitNormal;
+		// 		nearest_hitMatID = Sphere[i].materialID;
+		// 	}		
             
-        }
-        else{   
-			temp_hasHit = IntersectSphere( Sphere[i], ray, DEFAULT_TMIN, DEFAULT_TMAX,
-                      temp_t, temp_hitPos, temp_hitNormal );
+        }  
+		temp_hasHit = IntersectSphere( Sphere[i], ray, DEFAULT_TMIN, DEFAULT_TMAX,
+                  temp_t, temp_hitPos, temp_hitNormal );
 
-			if(temp_hasHit && temp_t < nearest_t){
-				hasHitSomething = true;
-				nearest_t = temp_t;
-				nearest_hitPos = temp_hitPos;
-				nearest_hitNormal = temp_hitNormal;
-				nearest_hitMatID = Sphere[i].materialID;
-			}
-        }
+		if(temp_hasHit && temp_t < nearest_t){
+			hasHitSomething = true;
+			nearest_t = temp_t;
+			nearest_hitPos = temp_hitPos;
+			nearest_hitNormal = temp_hitNormal;
+			nearest_hitMatID = Sphere[i].materialID;
+		}
     }
 
     //calculate aabox intersection
@@ -745,7 +745,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     // Set up view transformation
     
     //
-    
+
 
     // Create primary ray.
     float pixel_pos_z = -1.0 / tan(FOVY / 2.0);
@@ -753,6 +753,13 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     pRay.o = cam_pos;
     pRay.d = normalize( pixel_pos.x * cam_x_axis  +  pixel_pos.y * cam_y_axis  +  pixel_pos_z * cam_z_axis );
 
+    //moving 
+    vec3 move = changeCenter(Sphere[0].center);
+    Sphere[0].center.x = move.x; 
+    Sphere[i].center.y = move.y + Sphere[i].center.y;
+    Sphere[i].center.z = move.z + Sphere[i].center.z;
+            
+        //     // dropDetection(Sphere[i]);
 
     // Start Ray Tracing.
     // Use iterations to emulate the recursion.
