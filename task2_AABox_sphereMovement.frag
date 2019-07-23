@@ -54,7 +54,8 @@ const float INTERVAL = 0.5;
 
 //direction
 int MOV_DIRECTION = 0; // 1:up, 2:down, 3:left, 4:right
-float PREV_TIME, CURR_TIME;
+float PREV_TIME = 0.0;
+float CURR_TIME = 0.0;
 
 //============================================================================
 // Define new struct types.
@@ -611,7 +612,6 @@ void drop(Sphere_t sphere, AABox_t box, int side){
             sphere.center.x += sin(theta_t * delta_time);
         }
     }
-    float vert_time = iTime;
     float g = 9.8;
     //直线
     // while(sphere.center.y >= 0.0){
@@ -621,30 +621,30 @@ void drop(Sphere_t sphere, AABox_t box, int side){
 
 void dropDetection(Sphere_t sphere)
 {   
-    // vec3 cur_center = sphere.center;
-    // float radius = sphere.radius;
-    // for(int i = 0 ; i < NUM_AABOXES ; i++){
-    //     float front_side = AABox[i].center.z + 0.5 * AABox[i].size.z;
-    //     float right_side = AABox[i].center.x + 0.5 * AABox[i].size.x;
-    //     float back_side = AABox[i].center.z - 0.5 * AABox[i].size.z;
-    //     float left_side = AABox[i].center.x - 0.5 * AABox[i].size.x;
-    //     if(cur_center.z >= front_side){
-    //         drop(sphere, AABox[i], 1, iTime);
-    //         break;
-    //     }
-    //     if(cur_center.z <= back_side ){
-    //         drop(sphere, AABox[i], 2, iTime);
-    //         break;
-    //     }
-    //     if(cur_center.x <= left_side ){
-    //         drop(sphere, AABox[i], 3, iTime);
-    //         break;
-    //     }
-    //     if(cur_center.x >= right_side){
-    //         drop(sphere, AABox[i], 4, iTime);
-    //         break;
-    //     }
-    // }
+    vec3 cur_center = sphere.center;
+    float radius = sphere.radius;
+    for(int i = 0 ; i < NUM_AABOXES ; i++){
+        float front_side = AABox[i].center.z + 0.5 * AABox[i].size.z;
+        float right_side = AABox[i].center.x + 0.5 * AABox[i].size.x;
+        float back_side = AABox[i].center.z - 0.5 * AABox[i].size.z;
+        float left_side = AABox[i].center.x - 0.5 * AABox[i].size.x;
+        if(cur_center.z >= front_side){
+            drop(sphere, AABox[i], 1);
+            break;
+        }
+        if(cur_center.z <= back_side ){
+            drop(sphere, AABox[i], 2);
+            break;
+        }
+        if(cur_center.x <= left_side ){
+            drop(sphere, AABox[i], 3);
+            break;
+        }
+        if(cur_center.x >= right_side){
+            drop(sphere, AABox[i], 4);
+            break;
+        }
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -885,7 +885,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     Sphere[0].center.x = move.x; 
     Sphere[0].center.y = move.y + Sphere[0].center.y;
     Sphere[0].center.z = move.z + Sphere[0].center.z;
-            
+    //drop detection
+    CURR_TIME = iTime;
         //     // dropDetection(Sphere[i]);
 
     // Start Ray Tracing.
@@ -910,6 +911,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
         nextRay = Ray_t( hitPos, normalize( reflect(nextRay.d, hitNormal) ) );
     }
-
+    PREV_TIME = iTime;
     fragColor = vec4( I_result, 1.0 );
 }
