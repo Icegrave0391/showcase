@@ -224,6 +224,10 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
                 }
             }
         }
+        else
+        {
+            col = vec4(0.0, 1.0, 0.0, 0.0);
+        }
         
         if (isKeyPressed(KEY_W)) {
             col = vec4(0.0);
