@@ -905,6 +905,7 @@ vec3 CastRay( in Ray_t ray,
 /////////////////////////////////////////////////////////////////////////////
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
+    // Initialize scene
     InitScene();
     
     // Sphere move 
@@ -937,8 +938,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     vec3 cam_z_axis = normalize( cam_angle );
     vec3 cam_x_axis = normalize( cross(cam_up_vec, cam_z_axis) );
     vec3 cam_y_axis = normalize( cross(cam_z_axis, cam_x_axis));
-    
-    // Initialize scene
 	
 
     // Create primary ray.
@@ -947,14 +946,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     pRay.o = cam_pos;
     pRay.d = normalize( pixel_pos.x * cam_x_axis  +  pixel_pos.y * cam_y_axis  +  pixel_pos_z * cam_z_axis );
 
-    //moving 
-    vec3 move = changeCenter(Sphere[0].center);
-    Sphere[0].center.x = move.x; 
-    Sphere[0].center.y = move.y + Sphere[0].center.y;
-    Sphere[0].center.z = move.z + Sphere[0].center.z;
-    //drop detection
-    CURR_TIME = iTime + 1.0;
-    dropDetection(Sphere[0]);
 
     // Start Ray Tracing.
     // Use iterations to emulate the recursion.
