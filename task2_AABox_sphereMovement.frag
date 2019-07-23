@@ -304,7 +304,7 @@ void InitScene()
     Plane[0].C = 0.0;
     Plane[0].D = 0.0;
     Plane[0].type = 0;
-    Plane[0].materialID = 3;
+    Plane[0].materialID = 0;
 
     //Vertical plane
     Plane[1].A = 0.0;
@@ -312,7 +312,7 @@ void InitScene()
     Plane[1].C = 1.0;
     Plane[1].D = -45.0;
     Plane[1].type = 0;
-    Plane[1].materialID = 3;
+    Plane[1].materialID = 0;
     // Sphere.
     Sphere[0].center = vec3( 25.5, 3.6, 1.5 );
     Sphere[0].radius = 0.5;
@@ -322,11 +322,11 @@ void InitScene()
     InitMap();
 
     // Silver material.
-    Material[0].k_d = vec3( 0.5, 0.5, 0.5 );
-    Material[0].k_a = 0.2 * Material[0].k_d;
-    Material[0].k_r = 2.0 * Material[0].k_d;
+    Material[0].k_d = vec3( 0.2775, 0.2775, 0.2775);
+    Material[0].k_a = vec3(0.23125, 0.23125, 0.23125);
+    Material[0].k_r = vec3(0.773911, 0.773911, 0.773911);
     Material[0].k_rg = 0.5 * Material[0].k_r;   
-    Material[0].n = 64.0;
+    Material[0].n = 89.6;
 
     // Gold material.
     Material[1].k_d = vec3( 0.8, 0.7, 0.1 );
@@ -334,6 +334,11 @@ void InitScene()
     Material[1].k_r = 2.0 * Material[1].k_d;
     Material[1].k_rg = 0.5 * Material[1].k_r;
     Material[1].n = 64.0;
+    // Material[1].k_d = vec3(0.24725, 0.2245, 0.0645);
+    // Material[1].k_a = vec3(0.34615, 0.3143, 0.0903);
+    // Material[1].k_r = vec3(0.797357, 0.723991, 0.208006);
+    // Material[1].k_rg = 0.5 * Material[1].k_r;
+
 
     // Green plastic material.
     Material[2].k_d = vec3( 0.0, 0.8, 0.0 );
@@ -355,10 +360,12 @@ void InitScene()
     Material[4].n = 76.8;
 
     // Light 0.
-    Light[0].position = vec3( 4.0, 8.0, -3.0 );
-    Light[0].I_a = vec3( 0.1, 0.1, 0.1 );
-    Light[0].I_source = vec3( 1.0, 1.0, 1.0 );
-
+    // Light[0].position = vec3( 4.0, 8.0, -3.0 );
+    // Light[0].I_a = vec3( 0.1, 0.1, 0.1 );
+    // Light[0].I_source = vec3( 1.0, 1.0, 1.0 );
+    Light[0].position = vec3(19.5, 50.0, 19.5);
+    Light[0].I_a = vec3(0.25, 0.25, 0.25);
+    Light[0].I_source = vec3(1.0, 1.0, 1.0);
     // Light 1.
     Light[1].position = vec3( -4.0, 8.0, 0.0 );
     Light[1].I_a = vec3( 0.1, 0.1, 0.1 );
