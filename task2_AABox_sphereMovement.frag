@@ -515,30 +515,30 @@ void drop(Sphere_t sphere, AABox_t box, int side){
 
 void dropDetection(Sphere_t sphere)
 {   
-    vec3 cur_center = sphere.center;
-    float radius = sphere.radius;
-    for(int i = 0 ; i < NUM_AABOXES ; i++){
-        float front_side = AABox[i].center.z + 0.5 * AABox[i].size.z;
-        float right_side = AABox[i].center.x + 0.5 * AABox[i].size.x;
-        float back_side = AABox[i].center.z - 0.5 * AABox[i].size.z;
-        float left_side = AABox[i].center.x - 0.5 * AABox[i].size.x;
-        if(cur_center.z >= front_side){
-            drop(sphere, AABox[i], 1, iTime);
-            break;
-        }
-        if(cur_center.z <= back_side ){
-            drop(sphere, AABox[i], 2, iTime);
-            break;
-        }
-        if(cur_center.x <= left_side ){
-            drop(sphere, AABox[i], 3, iTime);
-            break;
-        }
-        if(cur_center.x >= right_side){
-            drop(sphere, AABox[i], 4, iTime);
-            break;
-        }
-    }
+    // vec3 cur_center = sphere.center;
+    // float radius = sphere.radius;
+    // for(int i = 0 ; i < NUM_AABOXES ; i++){
+    //     float front_side = AABox[i].center.z + 0.5 * AABox[i].size.z;
+    //     float right_side = AABox[i].center.x + 0.5 * AABox[i].size.x;
+    //     float back_side = AABox[i].center.z - 0.5 * AABox[i].size.z;
+    //     float left_side = AABox[i].center.x - 0.5 * AABox[i].size.x;
+    //     if(cur_center.z >= front_side){
+    //         drop(sphere, AABox[i], 1, iTime);
+    //         break;
+    //     }
+    //     if(cur_center.z <= back_side ){
+    //         drop(sphere, AABox[i], 2, iTime);
+    //         break;
+    //     }
+    //     if(cur_center.x <= left_side ){
+    //         drop(sphere, AABox[i], 3, iTime);
+    //         break;
+    //     }
+    //     if(cur_center.x >= right_side){
+    //         drop(sphere, AABox[i], 4, iTime);
+    //         break;
+    //     }
+    // }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -604,9 +604,8 @@ vec3 CastRay( in Ray_t ray,
 		// 		nearest_hitPos = temp_hitPos;
 		// 		nearest_hitNormal = temp_hitNormal;
 		// 		nearest_hitMatID = Sphere[i].materialID;
-		// 	}		
-            
-        }  
+		// 	}		   
+        // }  
 		temp_hasHit = IntersectSphere( Sphere[i], ray, DEFAULT_TMIN, DEFAULT_TMAX,
                   temp_t, temp_hitPos, temp_hitNormal );
 
@@ -756,8 +755,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     //moving 
     vec3 move = changeCenter(Sphere[0].center);
     Sphere[0].center.x = move.x; 
-    Sphere[i].center.y = move.y + Sphere[i].center.y;
-    Sphere[i].center.z = move.z + Sphere[i].center.z;
+    Sphere[0].center.y = move.y + Sphere[0].center.y;
+    Sphere[0].center.z = move.z + Sphere[0].center.z;
             
         //     // dropDetection(Sphere[i]);
 
