@@ -285,27 +285,27 @@ void InitMap()
     // Cone.
     Cone[0].cosa = 0.7;
     Cone[0].height = 0.5;
-    Cone[0].apex = vec3(0.0, 6.1, 0.5);
+    Cone[0].apex = vec3(25.5, 6.1, 1.5);
     Cone[0].axis = vec3(0.0, -1.0, 0.0);
     Cone[0].materialID = 2;
 
     Cone[1].cosa = 0.7;
     Cone[1].height = 0.5;
-    Cone[1].apex = vec3(0.0, 5.1, 0.5);
+    Cone[1].apex = vec3(25.5, 5.1, 1.5);
     Cone[1].axis = vec3(0.0, 1.0, 0.0);
     Cone[1].materialID = 2;
 
     Cone[2].cosa = 0.7;
     Cone[2].height = 0.5;
-    Cone[2].apex = vec3(20.0, 6.1 + 0.1 * cos(iTime), 29.5);
+    Cone[2].apex = vec3(19.5, 6.1 + 0.3 * cos(iTime * 5.0), 37.5);
     Cone[2].axis = vec3(0.0, -1.0, 0.0);
-    Cone[2].materialID = 2;
+    Cone[2].materialID = 4;
 
     Cone[3].cosa = 0.7;
     Cone[3].height = 0.5;
-    Cone[3].apex = vec3(20.0, 5.1 + 0.1 * cos(iTime), 29.5);
+    Cone[3].apex = vec3(19.5, 5.1 + 0.3 * cos(iTime * 5.0), 37.5);
     Cone[3].axis = vec3(0.0, 1.0, 0.0);
-    Cone[3].materialID = 2;
+    Cone[3].materialID = 4;
 
     Cone[4].cosa = 0.7;
     Cone[4].height = 0.2;

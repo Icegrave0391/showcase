@@ -4,7 +4,7 @@ const float KEY_RIGHT = 39.5/256.0;
 const float KEY_DOWN  = 40.5/256.0;
 const float KEY_W     = 82.5/256.0;
 
-const float MOVE_SPEED = 4.0;
+const float MOVE_SPEED = 50.0;
 //const float ROT_SPEED = 4.0;
 const int NUM_AABOXES = 29;
 struct AABox_t {
@@ -169,7 +169,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     if (fragCoord.x < 1.0 && fragCoord.y < 1.0) 
     {
         col = texture(iChannel0, uv);
-        vec4 col = vec4(0.0);
         vec2 origin_pos = vec2(25.5, 1.5);
         float moveLength = MOVE_SPEED * iTimeDelta * 0.25;
         
