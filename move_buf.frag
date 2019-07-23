@@ -1,3 +1,20 @@
+//============================================================================
+// PROJECT ID: CLUSTER1-27
+//
+// GROUP NUMBER:11
+//
+// STUDENT NAME: Jiang Xiaochong
+// NUS User ID.: t0918078
+//
+// STUDENT NAME: Zeng Mingjie
+// NUS User ID.: t0918460
+//
+// STUDENT NAME: Zhang Chuqi
+// NUS User ID.: t0918199
+//
+// COMMENTS TO GRADER: 
+//
+//============================================================================
 const float KEY_LEFT  = 37.5/256.0;
 const float KEY_UP    = 38.5/256.0;
 const float KEY_RIGHT = 39.5/256.0;
