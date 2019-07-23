@@ -33,7 +33,7 @@ const int NUM_MATERIALS = 3;
 const int NUM_PLANES = 1;
 const int NUM_SPHERES = 1;
 const int NUM_AABOXES = 7;
-const int NUM_CONES = 3;
+const int NUM_CONES = 6;
 
 const vec3 BACKGROUND_COLOR = vec3( 0.1, 0.2, 0.6 );
 
@@ -171,23 +171,41 @@ void InitMap()
     AABox[6].materialID = 0;
 
     // Cone.
-    Cone[0].cosa = 0.9;
-    Cone[0].height = 1.0;
+    Cone[0].cosa = 0.7;
+    Cone[0].height = 0.5;
     Cone[0].apex = vec3(0.0, 6.1, 0.5);
     Cone[0].axis = vec3(0.0, -1.0, 0.0);
     Cone[0].materialID = 2;
 
-    Cone[1].cosa = 0.9;
-    Cone[1].height = 1.0;
-    Cone[1].apex = vec3(20.0, 6.1, 29.5);
-    Cone[1].axis = vec3(0.0, -1.0, 0.0);
+    Cone[1].cosa = 0.7;
+    Cone[1].height = 0.5;
+    Cone[1].apex = vec3(0.0, 5.1, 0.5);
+    Cone[1].axis = vec3(0.0, 1.0, 0.0);
     Cone[1].materialID = 2;
 
-    Cone[2].cosa = 0.95;
-    Cone[2].height = 0.3;
-    Cone[2].apex = vec3(Sphere[0].center.x, 4.1, Sphere[0].center.z);
-    Cone[2].axis = vec3(0.0, 1.0, 0.0);
+    Cone[2].cosa = 0.7;
+    Cone[2].height = 0.5;
+    Cone[2].apex = vec3(20.0, 6.1, 29.5);
+    Cone[2].axis = vec3(0.0, -1.0, 0.0);
     Cone[2].materialID = 2;
+
+    Cone[3].cosa = 0.7;
+    Cone[3].height = 0.5;
+    Cone[3].apex = vec3(20.0, 5.1, 29.5);
+    Cone[3].axis = vec3(0.0, 1.0, 0.0);
+    Cone[3].materialID = 2;
+
+    Cone[4].cosa = 0.7;
+    Cone[4].height = 0.2;
+    Cone[4].apex = vec3(Sphere[0].center.x, 4.7, Sphere[0].center.z);
+    Cone[4].axis = vec3(0.0, 1.0, 0.0);
+    Cone[4].materialID = 2;
+
+    Cone[5].cosa = 0.7;
+    Cone[5].height = 0.2;
+    Cone[5].apex = vec3(Sphere[0].center.x, 5.1, Sphere[0].center.z);
+    Cone[5].axis = vec3(0.0, -1.0, 0.0);
+    Cone[5].materialID = 2;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -913,7 +931,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     Sphere[0].center.x = move.x; 
     Sphere[0].center.y = move.y + Sphere[0].center.y;
     Sphere[0].center.z = move.z + Sphere[0].center.z;
-    Cone[2].apex = vec3(Sphere[0].center.x, 4.5, Sphere[0].center.z);
+    Cone[4].apex = vec3(Sphere[0].center.x, 4.7, Sphere[0].center.z);
+    Cone[5].apex = vec3(Sphere[0].center.x, 5.1, Sphere[0].center.z);
     
     // dropDetection(Sphere[i]);
     
