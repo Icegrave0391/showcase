@@ -24,7 +24,6 @@
 // Your browser must support WebGL 2.0.
 // Check your browser at http://webglreport.com/?v=2
 
-
 //============================================================================
 // Constants.
 //============================================================================
@@ -320,6 +319,12 @@ void InitMap()
     Cone[5].materialID = 2;
 }
 
+void InitMoveLight(){
+    Light[1].position = Sphere[0].center + vec3(3.0 * cos(iTime), 10.0, 3.0 * cos(iTime));
+    Light[1].I_a = vec3( 0.13, 0.13, 0.13 );
+    Light[1].I_source = vec3( 1.0, 1.0, 1.0 );
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Initializes the scene.
 /////////////////////////////////////////////////////////////////////////////
@@ -398,9 +403,9 @@ void InitScene()
     Light[0].I_a = vec3(0.25, 0.25, 0.25);
     Light[0].I_source = vec3(1.0, 1.0, 1.0);
     // Light 1.
-    Light[1].position = vec3( -4.0, 8.0, 0.0 );
-    Light[1].I_a = vec3( 0.1, 0.1, 0.1 );
-    Light[1].I_source = vec3( 1.0, 1.0, 1.0 );
+    // Light[1].position = vec3( -4.0, 8.0, 0.0 );
+    // Light[1].I_a = vec3( 0.1, 0.1, 0.1 );
+    // Light[1].I_source = vec3( 1.0, 1.0, 1.0 );
 
 }
 
@@ -426,8 +431,8 @@ bool IntersectPlane( in Plane_t pln, in Ray_t ray, in float tmin, in float tmax,
     // We have a hit -- output results.
     t = t0;
     hitPos = ray.o + t0 * ray.d;
-    if (hitPos.x < -50.0 || hitPos.x > 50.0 ||
-        hitPos.z < -50.0 || hitPos.z > 50.0)
+    if (hitPos.x < -0.0 || hitPos.x > 39.0 ||
+        hitPos.z < -0.0 || hitPos.z > 39.0)
         return false;
     hitNormal = normalize( N );
     return true;
@@ -457,8 +462,8 @@ bool IntersectPlane( in Plane_t pln, in Ray_t ray, in float tmin, in float tmax 
 }
 
 // Movement of the sphere
-vec3 ChangeCenter() {
-	return vec3(0.0);
+vec4 ChangeCenter() {
+	return texture(iChannel1, vec2(0.0)).xyzw;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -985,7 +990,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     InitScene();
     
     // Sphere move 
-    vec3 move = ChangeCenter();
+    vec4 Press = ChangeCenter();
+    vec3 move = Press.xyz;
+    float f_press = Press.w;
     if (int(move.y) == 1)
     {
         Success(fragColor, fragCoord);
@@ -996,7 +1003,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
         Sphere[0].center.z = move.z + Sphere[0].center.z;
         Cone[4].apex = vec3(Sphere[0].center.x, 4.5 - 0.2 * cos(iTime * 5.0), Sphere[0].center.z);
         Cone[5].apex = vec3(Sphere[0].center.x, 4.9 - 0.2 * cos(iTime * 5.0), Sphere[0].center.z);
-        
+        //move light
+        InitMoveLight();
         // Scale pixel 2D position such that its y coordinate is in [-1.0, 1.0].
         vec2 pixel_pos = (2.0 * fragCoord.xy - iResolution.xy) / iResolution.y;
         
@@ -1005,19 +1013,28 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
         vec2 mouse = iMouse.xy / iResolution.xy * .5;
         float angleX = iMouse.z > 0.0 ? 6.28 * mouse.x : 3.14 + 0.0;
         float angleY = iMouse.z > 0.0 ? (mouse.y * 6.28) - 0.4 : 0.3;
-        
-        vec3 cam_angle = (vec3(sin(angleX)*cos(angleY), sin(angleY), cos(angleX)*cos(angleY))) * 8.0;
+        vec3 cam_angle;
+        if(f_press == 1.0){
+            cam_angle = (vec3(sin(angleX)*cos(angleY), sin(angleY), cos(angleX)*cos(angleY))) * 8.0;
+        }
+        else{
+            cam_angle = (vec3(sin(angleX)*cos(angleY), sin(angleY), cos(angleX)*cos(angleY))) * 3.0;
+        }
         vec3 cam_lookat = Sphere[0].center;
         vec3 cam_pos = cam_lookat + cam_angle;
+        //vec3 cam_pos = vec3(19.5, 40, 0.0);
+        //vec3 cam_lookat = vec3(19.5, 0, 19.5);
         
         vec3 cam_fwd  = normalize(-cam_angle);
         vec3 cam_left = normalize(cross(cam_fwd, vec3(0.0, sign(cos(angleY)), 0.0)));
         vec3 cam_up_vec = normalize(cross(cam_left, cam_fwd));
+        //vec3 cam_up_vec = normalize(vec3(0.0, 1.0, 1.0));
 
         // Set up camera coordinate frame in world space.
         vec3 cam_z_axis = normalize( cam_angle );
         vec3 cam_x_axis = normalize( cross(cam_up_vec, cam_z_axis) );
         vec3 cam_y_axis = normalize( cross(cam_z_axis, cam_x_axis));
+        
         
 
         // Create primary ray.

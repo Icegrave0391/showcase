@@ -20,8 +20,8 @@ const float KEY_UP    = 38.5/256.0;
 const float KEY_RIGHT = 39.5/256.0;
 const float KEY_DOWN  = 40.5/256.0;
 const float KEY_W     = 82.5/256.0;
-
-const float MOVE_SPEED = 50.0;
+const float KEY_F     = 70.5/256.0;
+const float MOVE_SPEED = 20.0;
 //const float ROT_SPEED = 4.0;
 const int NUM_AABOXES = 29;
 struct AABox_t {
@@ -198,14 +198,12 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
                 vec2 temp_pos = origin_pos + vec2(col.x, col.z + moveLength);
                 if(onBox(temp_pos)){
                     col.z += moveLength;
-                    col.w = 1.0;
                 }
             }
             if (isKeyPressed(KEY_DOWN)) {
                 vec2 temp_pos = origin_pos + vec2(col.x, col.z - moveLength);
                 if(onBox(temp_pos)){
                     col.z -= moveLength;
-                    col.w = 2.0;
                 }
             }
         
@@ -213,15 +211,18 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
                 vec2 temp_pos = origin_pos + vec2(col.x - moveLength, col.z);
                 if(onBox(temp_pos)){
                     col.x -= moveLength;
-                    col.w = 4.0;
                 }
             }
             if (isKeyPressed(KEY_LEFT)) {
                 vec2 temp_pos = origin_pos + vec2(col.x + moveLength, col.z);
                 if(onBox(temp_pos)){
                     col.x += moveLength;
-                    col.w = 3.0;
                 }
+            }
+            if(isKeyPressed(KEY_F)){
+                col.w = 1.0;
+            }else{
+                col.w = 0.0;
             }
         }
         else
